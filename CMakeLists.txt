@@ -4,7 +4,7 @@ project(mygit)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS -O0)
 
-set(SRC_FILES objects.hpp GitHashObject.cpp objects.cpp)
+set(SRC_FILES objects.hpp GitHashObject.cpp objects.cpp index.cpp sha1_proxy.hpp)
 add_executable(mygit main.cpp ${SRC_FILES})
 
 target_precompile_headers(mygit PUBLIC precompile.h)

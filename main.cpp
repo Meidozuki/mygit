@@ -5,22 +5,37 @@
 #include <memory>
 #include <type_traits>
 #include <set>
+#include <array>
 using namespace std::string_view_literals;
 
 #include "FP_util.hpp"
 #include "objects.hpp"
-//#include "GitHashObject.hpp"
+#include "GitHashObject.hpp"
+#include "sha1_proxy.hpp"
+
+namespace test{
+class A{
+    int x;
+ public:
+    A() =default;
+};
+
+}
 
 
 int main() {
 
-    Blob t;
-    t.type_=ObjectType::kBlob;
-    t.sha1_="test sha";
-    t.content_ ="test test";
-    GitObjectsManager::getInstance().save(t);
+    std::cout << hashObject("blob 12") << '\n';
+    std::cout << hashObject("test content") << '\n';
+    std::cout << hashObject("blob 12\0test content"sv) << '\n';
 
-    std::cout << sizeof(std::string) << ' ' << sizeof(std::array<char,40>);
+    std::string s("blob 12");
+    s.resize(s.size()+1);
+    s.append("test content");
+    std::string_view view(s);
+
+    std::cout << hashObject(view) << '\n';
+    std::cout << hashObjectInterface("test content") << '\n';
 
 
 }
