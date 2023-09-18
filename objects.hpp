@@ -7,11 +7,7 @@
 #include "precompile.h"
 
 #include <vector>
-#include <array>
 #include <string>
-#include <set>
-#include <filesystem>
-#include <optional>
 
 #include "FP_util.hpp"
 #include "common.hpp"
@@ -32,7 +28,7 @@ class GitObject {
             case ObjectType::kTree: return "tree";
             case ObjectType::kCommit: return "commit";
             case ObjectType::kTag: return "tag";
-            default: throw std::logic_error("Uncaught git object type! (in GitObject::type())");
+            default: throw std::logic_error("Uncaught git object type!");
         }
     }
 };

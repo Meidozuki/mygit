@@ -1,41 +1,54 @@
 #pragma once
 
+#include "precompile.h"
+
+#include <set>
+#include <filesystem>
+
+#include "common.hpp"
 #include "objects.hpp"
 #include "sha1_proxy.hpp"
 #include "FP_util.hpp"
 
-class GitObjectsManager {
+class GitObjectsProxy {
  public:
     using HashType = SHAString;
     using HashArg = const HashType&;
  private:
-    std::set<HashType> set_;
-    using IteratorType = typename decltype(set_)::iterator;
+    static inline const Path GIT_DIR = ".mgit/"; // warning针对Path的构造函数没有noexcept，可无视
+    std::set<HashType> database_;
+    using IteratorType = typename decltype(database_)::iterator;
 
  public:
-    static GitObjectsManager& getInstance() {
-        static GitObjectsManager instance;
+    static GitObjectsProxy& getInstance() {
+        static GitObjectsProxy instance;
         return instance;
+    }
+
+    void initFromDisk() {
+        Path objects_dir{GIT_DIR / "objects/"};
+        if (filesys::exists(objects_dir)) {
+            // TODO
+        }
     }
 
     [[gnu::always_inline]]
     bool find(HashArg hash) const {
-        return set_.find(hash) != set_.end();
+        return database_.find(hash) != database_.end();
     }
 
     /**
-     * 
      * @param hash 
      * @return The iterator to the hash
      */
     auto insert(HashArg hash) {
-        auto insert_result = set_.insert(hash);
+        auto insert_result = database_.insert(hash);
         return insert_result.first;
     }
 
     Option<std::string> getFilePath(HashArg hash) const {
         if (find(hash)) {
-            Option<std::string> path(".mgit/objects/");
+            Option<std::string> path{(GIT_DIR / "objects/").string()};
             path.value().append(hash);
             return path;
         }
@@ -77,9 +90,8 @@ class GitObjectsManager {
         }
     }
 
-
-    GitObjectsManager& operator=(const GitObjectsManager &ano) = delete;
+    GitObjectsProxy& operator=(const GitObjectsProxy &ano) = delete;
  private:
-    GitObjectsManager() = default;
-    ~GitObjectsManager() = default;
+    GitObjectsProxy() = default;
+    ~GitObjectsProxy() = default;
 };

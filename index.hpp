@@ -18,7 +18,7 @@
 struct IndexEntry {
     using FileSizeType = std::size_t;
 
-    mutable FileMode file_mode;
+    FileMode file_mode;
     FileSizeType file_size;
     const char* sha1;
     VariableString filename;
@@ -33,7 +33,14 @@ struct IndexEntry {
         return t;
     }
 
-    void chmod();
+    void chmod(bool isExec) {
+        if (file_mode == FileMode::kRegular && isExec) {
+            file_mode = FileMode::kRegularExecutable;
+        }
+        else if (file_mode == FileMode::kRegularExecutable && !isExec) {
+            file_mode = FileMode::kRegular;
+        }
+    }
 };
 
 

@@ -6,14 +6,11 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/sha.h>
 #include <cryptopp/hex.h>
 
-#include "common.hpp"
-#include "objects.hpp"
 #include "objects_proxy.hpp"
 
 // Do a direct SHA1 hash on message
@@ -82,7 +79,7 @@ SHAString hashObjectInterface(StringView msg, InArgType arg_type, ObjectType typ
 
     if (if_write) {
         // Get path to save
-        auto &objects_proxy = GitObjectsManager::getInstance();
+        auto &objects_proxy = GitObjectsProxy::getInstance();
         objects_proxy.insert(hash);
         Path file_path = objects_proxy.getFilePath(hash).value(); // no failure
         

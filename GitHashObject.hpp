@@ -6,13 +6,11 @@
 
 #include "precompile.h"
 
-#include <string>
 #include <string_view>
 
 #include "common.hpp"
 #include "sha1_proxy.hpp"
 
-using StringType = std::string;
 using StringView = std::string_view;
 
 SHAString hashObject(StringView str);

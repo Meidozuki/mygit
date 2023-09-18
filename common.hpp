@@ -9,6 +9,8 @@
 using Path = std::filesystem::path;
 using VariableString = std::string;
 
+namespace filesys = std::filesystem;
+
 #pragma region Enums
 enum class ObjectType: uint8_t{
     kBlob,

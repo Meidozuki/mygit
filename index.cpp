@@ -9,7 +9,6 @@
 using std::unique_ptr;
 
 void Index::updateIndex(const Path &filename, std::error_code &ec) noexcept {
-    namespace filesys = std::filesystem;
     if (filesys::exists(filename, ec)) {
         if (filesys::is_regular_file(filename, ec)) {
             auto file = std::make_unique<RegularFile>();
