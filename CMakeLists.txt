@@ -17,3 +17,5 @@ set_target_properties(crypto_lib PROPERTIES
 
 target_link_libraries(mygit PUBLIC crypto_lib)
 target_include_directories(mygit PUBLIC ${lib_prefix}/include)
+
+add_subdirectory(unittest)
