@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "precompile.h"
+#include "../precompile.h"
 
 #include <filesystem>
 #include <map>

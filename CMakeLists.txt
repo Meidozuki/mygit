@@ -4,20 +4,17 @@ project(mygit)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS -O0)
 
-set(SRC_FILES objects.hpp GitHashObject.cpp objects.cpp index.cpp sha1_proxy.hpp)
-add_executable(mygit main.cpp ${SRC_FILES})
+set(SRC_FILES src/GitHashObject.cpp src/objects.cpp src/index.cpp src/sha1_proxy.hpp)
+add_executable(mygit src/main.cpp ${SRC_FILES})
+add_library(src_lib STATIC ${SRC_FILES})
 
 target_precompile_headers(mygit PUBLIC precompile.h)
-
-# add_library(crypto_lib STATIC IMPORTED)
-
-# set(lib_prefix ${PROJECT_SOURCE_DIR}/cryptopp)
-# set_target_properties(crypto_lib PROPERTIES
-#         IMPORTED_LOCATION ${lib_prefix}/lib/libcryptopp.a)
 
 add_subdirectory(cryptopp)
 
 target_link_libraries(mygit PUBLIC Crypto_LIB)
 target_include_directories(mygit PUBLIC ${Crypto_INCLUDE_DIR}/include)
+target_link_libraries(src_lib PUBLIC Crypto_LIB)
+target_include_directories(src_lib PUBLIC ${Crypto_INCLUDE_DIR}/include)
 
 add_subdirectory(unittest)

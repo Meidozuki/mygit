@@ -11,13 +11,10 @@ using namespace std::string_view_literals;
 #include "FP_util.hpp"
 #include "objects.hpp"
 #include "GitHashObject.hpp"
-#include "sha1_proxy.hpp"
-
+#include "common.hpp"
 
 int main() {
 
-    std::cout << hashObject("blob 12") << '\n';
-    std::cout << hashObject("test content") << '\n';
     std::cout << hashObject("blob 12\0test content"sv) << '\n';
 
     std::string s("blob 12");

@@ -16,6 +16,11 @@ add_executable(
 target_link_libraries(
         hello_test
         GTest::gtest_main
+        src_lib
+)
+target_include_directories(
+        hello_test PUBLIC
+        ${CMAKE_SOURCE_DIR}/src
 )
 
 include(GoogleTest)
