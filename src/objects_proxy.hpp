@@ -25,12 +25,10 @@ class GitObjectsProxy {
         return instance;
     }
 
-    void initFromDisk() {
-        Path objects_dir{GIT_DIR / "objects/"};
-        if (filesys::exists(objects_dir)) {
-            // TODO
-        }
-    }
+    [[gnu::const]]
+    static inline Path getGitDir() {return GIT_DIR;}
+    [[gnu::const]]
+    static inline Path getObjectsDir() {return GIT_DIR / "objects/";}
 
     [[gnu::always_inline]]
     bool find(HashArg hash) const {
@@ -54,6 +52,15 @@ class GitObjectsProxy {
         }
         else {
             return {};
+        }
+    }
+
+    void initFromDisk() {
+        const Path objects_dir(getObjectsDir());
+        if (filesys::exists(objects_dir)) {
+            for (auto &entry: filesys::directory_iterator(objects_dir)){
+                insert(entry.path().filename().string());
+            }
         }
     }
 

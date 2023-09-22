@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <optional>
 
 using Path = std::filesystem::path;
 using VariableString = std::string;
@@ -27,6 +28,19 @@ enum class FileMode: uint32_t {
     kSymbolicLink = 120000,
     kGitLink = 160000
 };
+
+[[gnu::const]]
+inline std::optional<FileMode> modeFromInt(uint32_t arg) {
+    switch (arg) {
+        case 40000: return FileMode::kDirectories;
+        case 100644: return FileMode::kRegular;
+        case 100755: return FileMode::kRegularExecutable;
+        case 120000: return FileMode::kSymbolicLink;
+        case 160000: return FileMode::kGitLink;
+        default: break;
+    }
+    return std::nullopt;
+}
 
 enum class InArgType: uint8_t{
     kRawString,

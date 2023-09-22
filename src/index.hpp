@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <utility>
 
 #include "common.hpp"
 #include "sha1_proxy.hpp"
@@ -22,6 +23,10 @@ struct IndexEntry {
     FileSizeType file_size;
     const char* sha1;
     VariableString filename;
+
+    IndexEntry() = default;
+    IndexEntry(FileMode mode, FileSizeType size, const char *sha, VariableString fname)
+        : file_mode(mode), file_size(size), sha1(sha), filename(std::move(fname)) {}
 
     virtual ObjectType getObjectType() const = 0;
 
@@ -45,6 +50,7 @@ struct IndexEntry {
 
 
 struct RegularFile: IndexEntry {
+    using IndexEntry::IndexEntry;
     [[gnu::const]]
     ObjectType getObjectType() const override {
         return ObjectType::kBlob;
@@ -52,6 +58,7 @@ struct RegularFile: IndexEntry {
 };
 
 struct DirectoryFile: IndexEntry {
+    using IndexEntry::IndexEntry;
     DirectoryFile() {
         file_size = 0;
         file_mode = FileMode::kDirectories;
@@ -87,4 +94,10 @@ class Index{
     using Path = std::filesystem::path;
     using ShaStored = std::string;
     std::map<SHAString, std::unique_ptr<IndexEntry>> dict_;
+    void insert(SHAString const& key, std::unique_ptr<IndexEntry>&& value) {
+        dict_[key] = std::move(value);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Index &index);
+    friend std::istream& operator>>(std::istream& is, Index &index);
 };

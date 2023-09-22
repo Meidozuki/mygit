@@ -12,9 +12,10 @@ using namespace std::string_view_literals;
 #include "objects.hpp"
 #include "GitHashObject.hpp"
 #include "common.hpp"
+#include "objects_proxy.hpp"
+#include "index.hpp"
 
 int main() {
-
     std::cout << hashObject("blob 12\0test content"sv) << '\n';
 
     std::string s("blob 12");
@@ -25,5 +26,5 @@ int main() {
     std::cout << hashObject(view) << '\n';
     std::cout << hashObjectInterface("test content", InArgType::kRawString, ObjectType::kBlob, true) << '\n';
 
-
+    GitObjectsProxy::getInstance().initFromDisk();
 }
