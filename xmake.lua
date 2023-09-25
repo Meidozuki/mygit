@@ -18,14 +18,16 @@ package_end()
 add_requires("cryptopp")
 add_requires("gtest")
 
+files = {"src/GitHashObject.cpp", "src/objects.cpp", "src/index.cpp"}
+
 target("src_lib")
     set_kind("static")
-    add_files("src/*.cpp")
+    add_files(files)
     add_packages("cryptopp")
 
 target("mygit")
     set_kind("binary")
-    add_files("src/*.cpp")
+    add_files("src/main.cpp", files)
     add_packages("cryptopp")
 
 target("mytest")

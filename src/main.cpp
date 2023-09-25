@@ -15,8 +15,9 @@ using namespace std::string_view_literals;
 #include "objects_proxy.hpp"
 #include "index.hpp"
 
+
 int main() {
-    std::cout << hashObject("blob 12\0test content"sv) << '\n';
+
 
     std::string s("blob 12");
     s.resize(s.size()+1);

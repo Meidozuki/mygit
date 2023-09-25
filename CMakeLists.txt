@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(SRC_FILES src/GitHashObject.cpp src/objects.cpp src/index.cpp src/sha1_proxy.hpp)
 add_executable(mygit src/main.cpp ${SRC_FILES})
 add_library(src_lib STATIC ${SRC_FILES})
+add_executable(debug_test src/one_file_test.cpp)
 
 target_precompile_headers(mygit PUBLIC src/precompile.h)
 

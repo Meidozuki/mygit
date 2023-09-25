@@ -21,12 +21,14 @@ SHAString hashObjectInterface(StringView msg,
 
 
 #include <cstdio>
-static bool testSSO() {
+static bool testSSO(bool verbose=true) {
     bool flag=true;
     for (auto example: {"small", "", "1", "123", "12345", "blob 12", "commit 123"}) {
         std::string s(example);
-        printf("size = %ld, capacity = %ld, string=%s\n", s.size(), s.capacity(), example);
-        if (s.size() == s.capacity()) flag = false;
+        if (verbose)
+            printf("size = %ld, capacity = %ld, string=%s\n", s.size(), s.capacity(), example);
+        if (s.size() == s.capacity())
+            flag = false;
     }
     return flag;
 }

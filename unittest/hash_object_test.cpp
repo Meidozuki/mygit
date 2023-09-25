@@ -4,7 +4,7 @@
 #include "objects_proxy.hpp"
 
 TEST(HashObjectTest, TestSSO) {
-    EXPECT_TRUE(testSSO());
+    EXPECT_TRUE(testSSO(false));
 }
 
 TEST(HashObjectTest, TestRawStringview) {

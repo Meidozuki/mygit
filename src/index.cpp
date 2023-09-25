@@ -12,20 +12,21 @@ using std::unique_ptr;
 void Index::updateIndex(const Path &filename, std::error_code &ec) noexcept {
     if (filesys::exists(filename, ec)) {
         if (filesys::is_regular_file(filename, ec)) {
-            auto file = std::make_unique<RegularFile>();
-            file->file_mode = FileMode::kRegular;
-            file->file_size = filesys::file_size(filename, ec);
-            file->filename = filename.string();
-
             using filesys::perms;
+            auto file = std::make_unique<RegularFile>();
+            file->filename = filename.string();
+            file->file_size = filesys::file_size(filename, ec);
+            file->file_mode = FileMode::kRegular;
+
             perms permission = filesys::status(filename).permissions();
             if ((permission & perms::owner_exec) != perms::none){
                 file->file_mode = FileMode::kRegularExecutable;
             }
 
             SHAString sha1 = hashObjectInterface(filename.string(), InArgType::kFilename, ObjectType::kBlob, true);
+            file->sha1 = sha1.data();
             // Add an item to the dict
-            dict_.emplace(sha1, std::move(file));
+            dict_.emplace(filename, std::move(file));
         }
         else if (filesys::is_directory(filename, ec)) {
             DirectoryFile file;
@@ -54,12 +55,13 @@ std::istream &operator>>(std::istream &is, Index &index) {
             return is;
         }
     }
-    while (!is.eof()) {
-        int mode_s;
+    // The eofbit needs to be set by peek()
+    for (;!is.eof();is.peek()) {
         // Avoid trailing '\n'
-        if (!(is >> mode_s)) {
-            break;
-        }
+        if (is.peek() == '\n') {is.ignore(); continue;}
+
+        int mode_s = 0;
+        is >> mode_s;
         // If mode is invalid, others are supposed to be invalid too.
         if (!modeFromInt(mode_s).has_value()) {
             is.setstate(std::ios::failbit);
@@ -70,24 +72,30 @@ std::istream &operator>>(std::istream &is, Index &index) {
         std::string type, hash, filename;
         int file_size;
         is >> type >> file_size >> hash; is.ignore();
-        std::getline(is, filename); is.ignore();
+        std::getline(is, filename);
+        if (filename.size() == 0) {
+            std::cerr << "Index entry empty filename: " << type << ' ' << hash << ' ' << filename << '\n';
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+
         if (mode == FileMode::kDirectories) {
             if (type != "tree") {
                 std::cerr << "Index entry wrong format: " << type << ' ' << hash << ' ' << filename << '\n';
-                continue;
+                is.setstate(std::ios::failbit);
+                return is;
             }
             SHAString sha1(SHA1Proxy::create_s(hash.c_str()));
-            auto &&entry = std::make_unique<DirectoryFile>(mode, file_size, sha1.data(), std::move(filename));
-            index.insert(sha1, std::move(entry));
+            index.addEntry(DirectoryFile(mode, file_size, sha1.data(), std::move(filename)));
         }
         else if (mode == FileMode::kRegular || mode == FileMode::kRegularExecutable) {
             if (type != "blob") {
                 std::cerr << "Index entry wrong format: " << type << ' ' << hash << ' ' << filename << '\n';
-                continue;
+                is.setstate(std::ios::failbit);
+                return is;
             }
             SHAString sha1(SHA1Proxy::create_s(hash.c_str()));
-            auto &&entry = std::make_unique<RegularFile>(mode, file_size, sha1.data(), std::move(filename));
-            index.insert(sha1, std::move(entry));
+            index.addEntry(RegularFile(mode, file_size, sha1.data(), std::move(filename)));
         }
     }
     return is;

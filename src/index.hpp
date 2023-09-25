@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <utility>
+#include <type_traits>
 
 #include "common.hpp"
 #include "sha1_proxy.hpp"
@@ -59,9 +60,10 @@ struct RegularFile: IndexEntry {
 
 struct DryRunFile: RegularFile {
     DryRunFile(const char *sha, VariableString fname)
-        : RegularFile(FileMode::kRegular, 0, sha,std::move(fname)) {}
+        : RegularFile(FileMode::kRegular, 0, sha, std::move(fname)) {}
     
-    DryRunFile(SHAString sha, VariableString fname): DryRunFile(sha.data(), std::move(fname)) {}
+    DryRunFile(SHAString sha, VariableString fname)
+        : DryRunFile(sha.data(), std::move(fname)) {}
 };
 
 struct DirectoryFile: IndexEntry {
@@ -81,35 +83,62 @@ struct DirectoryFile: IndexEntry {
 };
 
 class Index{
- private:
-    std::map<SHAString, std::unique_ptr<IndexEntry>> dict_;
-    void insert(SHAString const& key, std::unique_ptr<IndexEntry>&& value) {
-        dict_.emplace(key, std::move(value));
-    }
+ protected:
+    std::map<Path, std::unique_ptr<IndexEntry>> dict_;
+    bool suppress_warning;
  public:
     static Index& getInstance() {
         static Index instance;
         return instance;
     }
 
+    bool initFromDisk(const Path& index_path) {
+        std::ifstream fs(index_path);
+        if (fs.is_open()) {
+            fs >> *this;
+            return !fs.fail();
+        }
+        else {
+            return false;
+        }
+    }
+
+    // BE CAREFUL WITH IT!
+    void clean() {dict_.clear();}
     const auto& getDict() {return dict_;}
 
+
     template <typename T, std::enable_if_t<
-                          std::is_base_of_v<IndexEntry, T>>>
-    void addEntry(T &&val) {
-        insert(val.sha1, std::make_unique<T>(std::forward(val)));
+                          std::is_base_of_v<IndexEntry, std::remove_reference_t<T>>, bool> = true>
+    bool addEntry(T entry) {
+        Path t(entry.filename);
+        return insert(std::move(t), std::make_unique<T>(std::move(entry)));
     }
+
 
     void updateIndexCacheInfo(FileMode mode, const char *hash, std::filesystem::path path);
 
     void updateIndex(const Path& filename);
     void updateIndex(const Path& filename, std::error_code &ec) noexcept;
 
-
     Index& operator=(const Index &ano) = delete;
- private:
-    Index() = default;
+ protected:
+    Index():dict_(),suppress_warning(false) {}
     ~Index() = default;
+
+    /**
+     * The proxy to insert items to the dict.
+     * WARNING: Don't insert entry with it unless you are sure. Use addEntry instead.
+     * @param key a rvalue std::string
+     * @param value a unique_ptr, which is rvalue only
+     */
+    bool insert(Path &&key, std::unique_ptr<IndexEntry>&& value) {
+        if (!filesys::exists(key) && !suppress_warning) {
+            std::cerr << "Trying to add a non-existing filepath " << key << " to index\n";
+        }
+        auto &&result = dict_.emplace(std::move(key), std::move(value));
+        return result.second;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Index &index);
     friend std::istream& operator>>(std::istream& is, Index &index);
