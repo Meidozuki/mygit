@@ -9,13 +9,12 @@
 #include <vector>
 #include <string>
 
-#include "FP_util.hpp"
 #include "common.hpp"
+#include "sha1_proxy.hpp"
 
 class GitObject {
  public:
-    //TODO: check是否有必要用string
-    std::string sha1_;
+    SHAString sha1_;
     ObjectType type_;
     // get the content to write to disk
     virtual std::string freeze() const = 0;

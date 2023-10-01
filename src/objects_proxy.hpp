@@ -9,6 +9,7 @@
 #include "objects.hpp"
 #include "sha1_proxy.hpp"
 #include "FP_util.hpp"
+#include "GitHashObject.hpp"
 
 class GitObjectsProxy {
  public:
@@ -25,24 +26,54 @@ class GitObjectsProxy {
         return instance;
     }
 
+    // configure
     [[gnu::const]]
     static inline Path getGitDir() {return GIT_DIR;}
     [[gnu::const]]
     static inline Path getObjectsDir() {return GIT_DIR / "objects/";}
+
+    // initialize
+    void initFromDisk() {
+        const Path objects_dir(getObjectsDir());
+        if (filesys::exists(objects_dir)) {
+            for (auto &entry: filesys::directory_iterator(objects_dir)){
+                insert(entry.path().filename().string());
+            }
+        }
+    }
+
+    // CRUD
+    /**
+     * @param hash
+     * @return The iterator to the hash
+     */
+    IteratorType insert(HashArg hash) {
+        auto insert_result = database_.insert(hash);
+        return insert_result.first;
+    }
+
+    bool erase(HashArg hash) {
+        auto path = getFilePath(hash);
+        auto exists = path.map<bool>([](const Path &path){return filesys::exists(path);});
+        if (exists.has_value() && exists.get()) {
+            filesys::remove(path.get());
+        }
+
+        auto it = database_.find(hash);
+        if (it != database_.end()) {
+            database_.erase(it);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     [[gnu::always_inline]]
     bool find(HashArg hash) const {
         return database_.find(hash) != database_.end();
     }
 
-    /**
-     * @param hash 
-     * @return The iterator to the hash
-     */
-    auto insert(HashArg hash) {
-        auto insert_result = database_.insert(hash);
-        return insert_result.first;
-    }
 
     Option<std::string> getFilePath(HashArg hash) const {
         if (find(hash)) {
@@ -55,46 +86,16 @@ class GitObjectsProxy {
         }
     }
 
-    void initFromDisk() {
-        const Path objects_dir(getObjectsDir());
-        if (filesys::exists(objects_dir)) {
-            for (auto &entry: filesys::directory_iterator(objects_dir)){
-                insert(entry.path().filename().string());
-            }
-        }
-    }
 
-    [[deprecated]]
-    void save(const GitObject &object) {
-        Option<SHAString> hash(object.sha1_);
-        auto it = hash.map<IteratorType>(
-            [this](HashArg x) 
-            {return this->insert(x);}
-        );
-
-        auto file_path = it.flatMap<std::string>(
-            [this](const IteratorType &iterator)
-             {return this->getFilePath(*iterator);}
-        );
-
-        auto file = file_path.flatMap<bool>(
-            // string can convert to path
-            [&object](const std::filesystem::path &path)->Option<bool> {
-            std::filesystem::create_directories(path.parent_path());
-            std::ofstream fs(path);
-            if (fs.is_open()) {
-                auto &&content = object.freeze();
-                fs << object.type() << ' ' << content.size() << '\n' << content;
-                return true;
-            }
-            else {
-                return {};
-            }
-        });
-
-        if (!file.has_value()) {
-            std::cerr << "Save file " << std::quoted(object.sha1_) << " failed\n";
-        }
+    /**
+     * convenient wrapper to hash an already-built object (i.e. tree object).
+     * equals `git hash-object -w --stdin`
+     */
+    static SHAString hashObjectWrapper(const GitObject &object) {
+        return hashObjectInterface(object.freeze(),
+                                   InArgType::kRawString,
+                                   object.type_,
+                                   true);
     }
 
     GitObjectsProxy& operator=(const GitObjectsProxy &ano) = delete;

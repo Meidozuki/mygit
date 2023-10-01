@@ -92,8 +92,7 @@ class Index{
         return instance;
     }
 
-    const auto& getDict() {return dict_;}
-
+    // overall operations
     // BE CAREFUL WITH IT!
     void clean() {dict_.clear();}
     bool initFromDisk(const Path& index_path) {
@@ -107,7 +106,9 @@ class Index{
         }
     }
 
+    // element access operations
     bool find(const Path& x) {return dict_.find(x) != dict_.end();}
+    const auto& getDict() {return dict_;}
 
     template <typename T, std::enable_if_t<
                           std::is_base_of_v<IndexEntry, std::remove_reference_t<T>>, bool> = true>
@@ -116,6 +117,8 @@ class Index{
         Path t(entry.filename);
         return insert(t.lexically_normal(), std::make_unique<T>(std::move(entry)));
     }
+
+    SHAString writeTree(bool verbose=false);
 
     Index& operator=(const Index &ano) = delete;
  protected:
@@ -135,11 +138,7 @@ class Index{
         auto &&result = dict_.emplace(std::move(key), std::move(value));
         return result.second;
     }
-    
-    friend SHAString writeTree();
 
     friend std::ostream& operator<<(std::ostream& os, const Index &index);
     friend std::istream& operator>>(std::istream& is, Index &index);
 };
-
-SHAString writeTree();
