@@ -4,8 +4,6 @@
 
 #include "objects.hpp"
 
-// #include "index.hpp"
-
 std::string Tree::freeze() const {
     std::stringstream ss;
     for (auto &item: sub_items_) {
@@ -16,23 +14,23 @@ std::string Tree::freeze() const {
     return ss.str();
 }
 
-void Tree::addItem(const TreeItem &item) {
+void Tree::addItem(TreeItem item) {
     // if exists
     if (auto it = std::find(sub_items_.begin(), sub_items_.end(), item);
         it != sub_items_.end()) {
         // if modified
         if (it->hash_ != item.hash_) {
             sub_items_.erase(it);
-            sub_items_.push_back(item);
+            sub_items_.emplace_back(std::move(item));
         }
-            // not modified
+        // not modified
         else {
             return;
         }
     }
-        // not exist, add to end
+    // not exist, add to end
     else {
-        sub_items_.push_back(item);
+        sub_items_.emplace_back(std::move(item));
         num_entries++;
         if (item.object_type_ == ObjectType::kTree) {
             num_subtrees++;

@@ -14,8 +14,10 @@
 
 class GitObject {
  public:
+    //TODO: check是否有必要用string
     std::string sha1_;
     ObjectType type_;
+    // get the content to write to disk
     virtual std::string freeze() const = 0;
 
     const char* type() const {
@@ -54,6 +56,12 @@ struct TreeItem {
     TreeItem(Path filename, const char *hash, FileMode mode, ObjectType type)
         :filename_(std::move(filename)), hash_(hash), file_mode_(mode), object_type_(type) {}
 
+    // std::filesystem::path is not trivially-copyable so needs to declare these ops
+//    TreeItem(const TreeItem&) = default;
+//    TreeItem& operator=(const TreeItem&) = default;
+    TreeItem(TreeItem&&) = default;
+    TreeItem& operator=(TreeItem&&) = default;
+
     bool operator==(const TreeItem &ano) const {return filename_ == ano.filename_;}
 };
 
@@ -67,5 +75,5 @@ class Tree: public GitObject {
 
     std::string freeze() const override;
 
-    void addItem(const TreeItem &item);
+    void addItem(TreeItem item);
 };

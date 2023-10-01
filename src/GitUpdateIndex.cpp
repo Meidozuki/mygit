@@ -41,8 +41,6 @@ void updateIndexCacheInfo(FileMode mode, const char *hash, std::filesystem::path
         return;
     }
 
-    Option<SHAString> sha = SHA1Proxy::getInstance().get(hash);
-
     if (index().find(path)){
         auto &ptr = index().getDict().at(path);
         ptr->file_mode = mode;

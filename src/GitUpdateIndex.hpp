@@ -8,7 +8,7 @@
 #include "common.hpp"
 #include "index.hpp"
 
-
+void updateIndex(const Path& filename, std::error_code &ec) noexcept;
 
 void updateIndex(const Path& filename) {
     std::error_code ec;
@@ -17,7 +17,6 @@ void updateIndex(const Path& filename) {
         std::cerr << ec.message() << '\n';
     }
 }
-void updateIndex(const Path& filename, std::error_code &ec) noexcept;
 
 /**
  * 

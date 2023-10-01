@@ -112,8 +112,9 @@ class Index{
     template <typename T, std::enable_if_t<
                           std::is_base_of_v<IndexEntry, std::remove_reference_t<T>>, bool> = true>
     bool addEntry(T entry) {
+        // 函数调用时entry已经被移动，需要提前构造
         Path t(entry.filename);
-        return insert(std::move(t), std::make_unique<T>(std::move(entry)));
+        return insert(t.lexically_normal(), std::make_unique<T>(std::move(entry)));
     }
 
     Index& operator=(const Index &ano) = delete;
@@ -134,7 +135,11 @@ class Index{
         auto &&result = dict_.emplace(std::move(key), std::move(value));
         return result.second;
     }
+    
+    friend SHAString writeTree();
 
     friend std::ostream& operator<<(std::ostream& os, const Index &index);
     friend std::istream& operator>>(std::istream& is, Index &index);
 };
+
+SHAString writeTree();

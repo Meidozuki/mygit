@@ -7,6 +7,7 @@
 
 #include <string_view>
 #include <cstring>
+#include <array>
 #include <set>
 #include <optional>
 
@@ -68,10 +69,10 @@ class SHA1Proxy {
         }
     }
 
-    SHAString get(const char* hash) {
-        auto it = existing_.find(hash);
-        return it->get();
-    }
+//    SHAString get(const char* hash) {
+//        auto it = existing_.find(hash);
+//        return it->get();
+//    }
     
     SHAString get_safe(const char* hash) {
         auto re = retrieve(hash);
@@ -83,6 +84,41 @@ class SHA1Proxy {
         }
     }
 
+    static constexpr inline int hex2dec(char c) {
+        switch (c) {
+            case '0': return 0;
+            case '1': return 1;
+            case '2': return 2;
+            case '3': return 3;
+            case '4': return 4;
+            case '5': return 5;
+            case '6': return 6;
+            case '7': return 7;
+            case '8': return 8;
+            case '9': return 9;
+            case 'a': return 10;
+            case 'b': return 11;
+            case 'c': return 12;
+            case 'd': return 13;
+            case 'e': return 14;
+            case 'f': return 15;
+            default: throw std::invalid_argument("");
+        }
+    }
+
+    // Convert from human-readable string to hex string
+    static auto compressSHA(const char* hash) {
+        if (strlen(hash) != 40) {
+            throw std::invalid_argument("");
+        }
+
+        std::array<unsigned char,21> array;
+        for (int i=0;i < 20;++i) {
+            array[i] = hex2dec(hash[2*i]) * 16 + hex2dec(hash[2*i+1]);
+        }
+        array[20]='\0';
+        return array;
+    }
 
     // Convenient wrappers
     // C++禁止这种重载，所以使用后缀_s区分静态函数

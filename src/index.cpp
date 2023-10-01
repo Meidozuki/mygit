@@ -45,7 +45,7 @@ std::istream &operator>>(std::istream &is, Index &index) {
         is >> type >> file_size >> hash; is.ignore();
         std::getline(is, filename);
         if (filename.size() == 0) {
-            std::cerr << "Index entry empty filename: " << type << ' ' << hash << ' ' << filename << '\n';
+            std::cerr << "Index entry received an empty filename.\n";
             is.setstate(std::ios::failbit);
             return is;
         }
