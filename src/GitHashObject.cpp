@@ -1,11 +1,10 @@
-//
-// Created by user on 2023/9/3.
-//
 
 #include "GitHashObject.hpp"
 
-#include <iostream>
+#include <string>
 #include <fstream>
+#include <stdexcept>
+#include <filesystem>
 
 #include <cryptopp/cryptlib.h>
 #include <cryptopp/sha.h>
@@ -24,7 +23,7 @@ SHAString hashObject(StringView msg) {
     binary_digest.resize(sha1.DigestSize());
     sha1.Final((byte*)binary_digest.data());
 
-    bool uppercase = false;
+    constexpr bool uppercase = false;
     StringSource(binary_digest, true, new HexEncoder(
             new StringSink(encoded), uppercase
             ));
@@ -33,7 +32,7 @@ SHAString hashObject(StringView msg) {
 }
 
 // whether to sync with git or for better deserialize
-static const char SEPERATOR = '\0';
+static constexpr char SEPERATOR = '\0';
 
 /**
  * @param type
@@ -57,18 +56,19 @@ std::string getStringToHash(ObjectType type, const std::string& content) {
  * @return The result SHA1 hash
  */
 SHAString hashObjectInterface(StringView msg, InArgType arg_type, ObjectType type, bool if_write) {
+    using namespace std::string_literals;
     std::string original_str;
     if (arg_type == InArgType::kRawString) {
         original_str = msg;
     }
     else if (arg_type == InArgType::kFilename) {
         if (type != ObjectType::kBlob) {
-            throw std::invalid_argument("When hashObject receives a filename, it should be a *blob*.");
+            throw std::invalid_argument("When hashObject receives a filename, it should be a *blob*."); //throws
         }
         original_str = readFile(msg);
     }
     else {
-        throw std::invalid_argument("");
+        throw std::invalid_argument(""); //throws
     }
 
     std::string full = getStringToHash(type, original_str);
@@ -81,7 +81,7 @@ SHAString hashObjectInterface(StringView msg, InArgType arg_type, ObjectType typ
         // Get path to save
         auto &objects_proxy = GitObjectsProxy::getInstance();
         objects_proxy.insert(hash);
-        Path file_path = objects_proxy.getFilePath(hash).value(); // no failure
+        std::filesystem::path file_path = objects_proxy.getFilePath(hash).value(); // no failure
         
         // Open file to save
         std::filesystem::create_directories(file_path.parent_path());
@@ -90,7 +90,7 @@ SHAString hashObjectInterface(StringView msg, InArgType arg_type, ObjectType typ
             fs << full;
         }
         else {
-            std::cerr << "Open file " << std::quoted(hash) << " failed when saving it.\n";
+            throw std::runtime_error("Open file "s + std::string(hash) + " failed when saving it."s); //throws
         }
     }
 
