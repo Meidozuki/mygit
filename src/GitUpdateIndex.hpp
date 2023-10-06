@@ -8,7 +8,7 @@
 #include "common.hpp"
 #include "index.hpp"
 
-void updateIndex(Index &index, const Path& filename, std::error_code &ec) noexcept;
+void updateIndex(Index &index, const Path& filename, std::error_code &ec);
 
 inline void updateIndex(Index &index, const Path& filename) {
     std::error_code ec;

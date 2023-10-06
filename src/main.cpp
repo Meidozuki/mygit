@@ -24,16 +24,10 @@ int main() {
 //    index.addEntry<DryRunFile>(DryRunFile("sha333","f1/f2/3.txt"));
 
     Index &index = Index::getInstance();
-    std::cout << hashObjectInterface("Hello world", InArgType::kRawString, ObjectType::kBlob, true)<< '\n';
+    hashObjectInterface("Hello world", InArgType::kRawString, ObjectType::kBlob, true);
     updateIndexCacheInfo(index,FileMode::kRegular,"70c379b63ffa0795fdbfbc128e5a2818397b7ef8","1.txt",true);
-    SHAString sha= index.writeTree();
+    SHAString sha= index.writeTree(false);
     std::cout << sha << '\n';
 
-    Tree tree;
-    tree.addItem({"1.txt", "70c379b63ffa0795fdbfbc128e5a2818397b7ef8", FileMode::kRegular, ObjectType::kBlob});
-    std::cout << '\n';
-    std::cout << hashObjectInterface(tree.freeze(),
-                                     InArgType::kRawString, ObjectType::kTree) << '\n';
 
-    std::cout << sha << '\n';
 }

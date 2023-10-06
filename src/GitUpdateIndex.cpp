@@ -4,19 +4,15 @@
 #include "objects.hpp"
 #include "GitHashObject.hpp"
 
-void updateIndex(Index &index, const Path &filename, std::error_code &ec) noexcept {
+void updateIndex(Index &index, const Path &filename, std::error_code &ec) {
     if (filesys::exists(filename, ec)) {
         if (filesys::is_regular_file(filename, ec)) {
             using filesys::perms;
             RegularFile file;
             file.filename = filename.string();
             file.file_size = filesys::file_size(filename, ec);
+            // The git's behavior is to recognize a file as read-only, then mannually chmod +x
             file.file_mode = FileMode::kRegular;
-
-            perms permission = filesys::status(filename).permissions();
-            if ((permission & perms::owner_exec) != perms::none){
-                file.file_mode = FileMode::kRegularExecutable;
-            }
 
             SHAString sha1 = hashObjectInterface(filename.string(), InArgType::kFilename, ObjectType::kBlob, true);
             file.sha1 = sha1.data();
@@ -28,6 +24,10 @@ void updateIndex(Index &index, const Path &filename, std::error_code &ec) noexce
             file.filename = filename.string();
             //TODO tree hash
         }
+    }
+    else {
+        std::string msg = filename.string() + " does not exist and --remove not passed";
+        throw std::logic_error(msg);
     }
 }
 

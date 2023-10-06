@@ -33,10 +33,11 @@ void traversalTreeStructure(TreeNode &root, bool verbose=false) {
         return;
     }
     else {
-        std::cout << "sub-items of " << root.self_description.filename_ << ":\n";
         Tree tree_object;
         for (auto &pair: root.children) {
-            std::cout << pair.first << '|';
+            if (verbose) {
+                std::cout << "sub-items of " << root.self_description.filename_ << ": " << pair.first << std::endl;
+            }
             traversalTreeStructure(pair.second, verbose);
             tree_object.addItem(std::move(pair.second.self_description));
         }

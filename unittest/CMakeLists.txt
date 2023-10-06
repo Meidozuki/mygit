@@ -25,3 +25,16 @@ target_include_directories(
 
 include(GoogleTest)
 gtest_discover_tests(hello_test)
+
+function(combine_test arg_test_name arg_src_files)
+    add_executable(${arg_test_name} main_body.cpp ${arg_src_files})
+    target_link_libraries(${arg_test_name}
+            GTest::gtest_main
+            src_lib)
+    target_include_directories(${arg_test_name} PUBLIC
+            ${CMAKE_SOURCE_DIR}/src)
+    gtest_discover_tests(${arg_test_name})
+endfunction()
+
+combine_test(hash_object_test hash_object_test.cpp)
+combine_test(index_alone_test index_test.cpp)

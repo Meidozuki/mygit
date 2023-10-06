@@ -7,7 +7,9 @@ using namespace std::string_view_literals;
 #include "index.hpp"
 #include "objects_proxy.hpp"
 
-class IndexTest: public ::testing::Test {
+#include "index_test_common.hpp"
+
+class IndexTest: public IndexTestBase {
  protected:
     class IndexWrapper: public Index {
      public:
@@ -16,21 +18,17 @@ class IndexTest: public ::testing::Test {
 
     IndexWrapper index_;
 
-    Index& index() {
+    Index& index() override{
         return index_;
     }
 
-    Path index_path;
     std::string index_file_standard;
     
-    IndexTest():index_(),index_path(GitObjectsProxy::getGitDir() / "index") {}
+    IndexTest():index_() {}
 
     void SetUp() override {
-        index().clean();
-
-        if (std::filesystem::exists(index_path)) {
-            std::filesystem::remove(index_path);
-        }
+        cleanMemory();
+        cleanDisk();
 
         index_file_standard = "DIRC\n"
                               "100644 blob 0 sha111\n"
@@ -56,20 +54,14 @@ class IndexTest: public ::testing::Test {
     }
 };
 
-TEST_F(IndexTest, Test1) {
+TEST_F(IndexTest, SimpleTest1) {
     index().addEntry(DryRunFile("sha111","1.txt"));
-    for (auto &[k,ptr]: Index::getInstance().getDict()) {
-        EXPECT_EQ(k, "1.txt");
-        EXPECT_EQ(ptr->sha1, "sha111"sv);
-    }
+    compareOneEntry("1.txt", "sha111");
 }
 
-TEST_F(IndexTest, Test2) {
+TEST_F(IndexTest, SimpleTest2) {
     index().addEntry(DryRunFile("sha222333","2.txt"));
-    for (auto &[k,ptr]: Index::getInstance().getDict()) {
-        EXPECT_EQ(k, "2.txt");
-        EXPECT_EQ(ptr->sha1, "sha222333"sv);
-    }
+    compareOneEntry("2.txt", "sha222333");
 }
 
 
@@ -120,24 +112,16 @@ TEST_F(IndexTest, TestIndexInputSucessRegular) {
     writeToIndex("DIRC\n" "100644 blob 0 sha111\n" "1.txt\n");
 
     ASSERT_TRUE(index().initFromDisk(index_path));
-    ASSERT_EQ(index().getDict().size(), 1);
-    
-    for (auto &[k,ptr]: Index::getInstance().getDict()) {
-        EXPECT_EQ(k, "1.txt");
-        EXPECT_EQ(ptr->sha1, "sha111"sv);
-    }
+
+    compareOneEntry("1.txt", "sha111");
 }
 
 TEST_F(IndexTest, TestIndexInputSucessRegularExe) {
     writeToIndex("DIRC\n" "100755 blob 0 sha111\n" "1.txt\n");
 
     ASSERT_TRUE(index().initFromDisk(index_path));
-    ASSERT_EQ(index().getDict().size(), 1);
-    
-    for (auto &[k,ptr]: Index::getInstance().getDict()) {
-        EXPECT_EQ(k, "1.txt");
-        EXPECT_EQ(ptr->sha1, "sha111"sv);
-    }
+
+    compareOneEntry("1.txt", "sha111");
 }
 
 TEST_F(IndexTest, TestIndexInputSucessRegular2) {
