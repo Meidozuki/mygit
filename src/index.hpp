@@ -92,6 +92,10 @@ class Index{
         return instance;
     }
 
+    const auto& getDict() {return dict_;}
+
+    // BE CAREFUL WITH IT!
+    void clean() {dict_.clear();}
     bool initFromDisk(const Path& index_path) {
         std::ifstream fs(index_path);
         if (fs.is_open()) {
@@ -103,10 +107,7 @@ class Index{
         }
     }
 
-    // BE CAREFUL WITH IT!
-    void clean() {dict_.clear();}
-    const auto& getDict() {return dict_;}
-
+    bool find(const Path& x) {return dict_.find(x) != dict_.end();}
 
     template <typename T, std::enable_if_t<
                           std::is_base_of_v<IndexEntry, std::remove_reference_t<T>>, bool> = true>
@@ -114,12 +115,6 @@ class Index{
         Path t(entry.filename);
         return insert(std::move(t), std::make_unique<T>(std::move(entry)));
     }
-
-
-    void updateIndexCacheInfo(FileMode mode, const char *hash, std::filesystem::path path);
-
-    void updateIndex(const Path& filename);
-    void updateIndex(const Path& filename, std::error_code &ec) noexcept;
 
     Index& operator=(const Index &ano) = delete;
  protected:

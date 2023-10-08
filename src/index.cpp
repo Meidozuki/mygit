@@ -4,37 +4,8 @@
 
 #include "index.hpp"
 
-#include "GitHashObject.hpp"
 #include "objects.hpp"
 
-using std::unique_ptr;
-
-void Index::updateIndex(const Path &filename, std::error_code &ec) noexcept {
-    if (filesys::exists(filename, ec)) {
-        if (filesys::is_regular_file(filename, ec)) {
-            using filesys::perms;
-            auto file = std::make_unique<RegularFile>();
-            file->filename = filename.string();
-            file->file_size = filesys::file_size(filename, ec);
-            file->file_mode = FileMode::kRegular;
-
-            perms permission = filesys::status(filename).permissions();
-            if ((permission & perms::owner_exec) != perms::none){
-                file->file_mode = FileMode::kRegularExecutable;
-            }
-
-            SHAString sha1 = hashObjectInterface(filename.string(), InArgType::kFilename, ObjectType::kBlob, true);
-            file->sha1 = sha1.data();
-            // Add an item to the dict
-            dict_.emplace(filename, std::move(file));
-        }
-        else if (filesys::is_directory(filename, ec)) {
-            DirectoryFile file;
-            file.filename = filename.string();
-            //TODO tree hash
-        }
-    }
-}
 std::ostream &operator<<(std::ostream &os, const Index &index) {
     os << "DIRC\n";
     for (auto &[_, entry]: index.dict_) {

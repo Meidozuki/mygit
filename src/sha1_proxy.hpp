@@ -68,6 +68,21 @@ class SHA1Proxy {
         }
     }
 
+    SHAString get(const char* hash) {
+        auto it = existing_.find(hash);
+        return it->get();
+    }
+    
+    SHAString get_safe(const char* hash) {
+        auto re = retrieve(hash);
+        if (re.has_value()) {
+            return re.value()->get();
+        }
+        else {
+            return "";
+        }
+    }
+
 
     // Convenient wrappers
     // C++禁止这种重载，所以使用后缀_s区分静态函数

@@ -1,7 +1,7 @@
 unzip cryptopp880.zip
 make -j4
-make install DESTDIR=../install/cryptopp
-cd ../install/cryptopp
+make install DESTDIR=../cryptopp
+cd ../cryptopp
 mv usr/local/* .
 rm -r usr
 pwd

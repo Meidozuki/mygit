@@ -1,5 +1,6 @@
 //
-// Created by user on 2023/9/3.
+// 对应命令 git hash-object
+// 由于需要cryptopp库，强烈建议单独成一个文件
 //
 
 #pragma once

@@ -161,7 +161,7 @@ TEST_F(IndexTest, TestIndexInputFailureWrongFileMode) {
 }
 
 TEST_F(IndexTest, TestIndexInputFailureWrongObjectType) {
-    writeToIndex("DIRC\n" "100644 commit 0 sha111\n" "1.txt\n");
+    writeToIndex("DIRC\n" "100644 tree 0 sha111\n" "1.txt\n");
 
     ASSERT_FALSE(index().initFromDisk(index_path));
     ASSERT_EQ(index().getDict().size(), 0);
