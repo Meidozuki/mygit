@@ -75,4 +75,8 @@ class Tree: public GitObject {
     std::string freeze() const override;
 
     void addItem(TreeItem item);
+
+    void cacheTreeInvalidate() {
+        num_entries = -1;
+    }
 };

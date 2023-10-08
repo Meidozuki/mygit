@@ -10,6 +10,6 @@ using std::cout;
 int main () {
 
 
-    std::ofstream("1.txt") << "test";
+    std::cout << filesys::exists(".");
 
 }

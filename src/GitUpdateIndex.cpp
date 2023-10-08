@@ -1,6 +1,7 @@
 #include "GitUpdateIndex.hpp"
 
-#include "index.hpp"
+#include <stdexcept>
+
 #include "objects.hpp"
 #include "GitHashObject.hpp"
 
@@ -25,9 +26,7 @@ void updateIndex(Index &index, const Path &filename, std::error_code &ec) {
             index.addEntry(std::move(file));
         }
         else if (filesys::is_directory(filename, ec)) {
-            DirectoryFile file;
-            file.filename = filename.string();
-            //TODO tree hash
+            throw std::logic_error("update-index receives a directory - add files inside instead");
         }
     }
     else {

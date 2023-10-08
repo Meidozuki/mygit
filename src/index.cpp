@@ -4,12 +4,26 @@
 
 #include "index.hpp"
 
+#include <iomanip>
+
 #include "objects.hpp"
 
 std::ostream &operator<<(std::ostream &os, const Index &index) {
     os << "DIRC\n";
     for (auto &[_, entry]: index.dict_) {
+        if (entry->getObjectType() != ObjectType::kBlob) continue;
+
         os << (int) entry->file_mode << ' '\
+            << GitObject::typeName(entry->getObjectType())  << ' '\
+            << entry->file_size << ' '\
+            << entry->sha1 << '\n'\
+            << entry->filename << '\n';
+    }
+    
+    for (auto &[_, entry]: index.dict_) {
+        if (entry->getObjectType() != ObjectType::kTree) continue;
+        
+        os << std::setfill('0') << std::setw(6) << (int) entry->file_mode << ' '\
             << GitObject::typeName(entry->getObjectType())  << ' '\
             << entry->file_size << ' '\
             << entry->sha1 << '\n'\

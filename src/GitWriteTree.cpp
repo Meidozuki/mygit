@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <queue>
 
 #include "common.hpp"
 #include "sha1_proxy.hpp"
@@ -26,19 +27,26 @@ struct TreeNode {
     }
 };
 
+using FIFOQueue = std::queue<DirectoryFile>;
 
-
-void traversalTreeStructure(TreeNode &root, bool verbose=false) {
+void traversalTreeStructure(TreeNode &root, FIFOQueue &FIFO, bool verbose=false) {
     if (!root.hasChildren()) {
         return;
     }
     else {
+        // placeholder
+        FIFO.emplace();
+        DirectoryFile &entry = FIFO.back();
+
         Tree tree_object;
         for (auto &pair: root.children) {
             if (verbose) {
                 std::cout << "sub-items of " << root.self_description.filename_ << ": " << pair.first << std::endl;
             }
-            traversalTreeStructure(pair.second, verbose);
+            traversalTreeStructure(pair.second, FIFO, verbose);
+            
+            TreeItem& item = pair.second.self_description;
+            item.filename_ = item.filename_.filename(); //convert to relative
             tree_object.addItem(std::move(pair.second.self_description));
         }
         root.children.clear();
@@ -46,7 +54,10 @@ void traversalTreeStructure(TreeNode &root, bool verbose=false) {
         // write to object database
         SHAString hash = hashObjectInterface(tree_object.freeze(),InArgType::kRawString,ObjectType::kTree,true);
         tree_object.sha1_ = hash;
-        // TODO: extension，写入到index中
+        
+        // extension: 写入到index中
+        entry.sha1 = hash.data();
+        entry.filename = root.self_description.filename_;
 
         // return the result to the caller
         root.self_description.hash_ = hash.data();
@@ -76,7 +87,7 @@ void traversalTreeStructure(TreeNode &root, bool verbose=false) {
 SHAString Index::writeTree(bool verbose) {
     TreeNode head;
     for (auto &pair: Index::getInstance().dict_) {
-        // the time of rebuilding a tree object and that of checking whether it changes are the same
+        // TODO: the time of rebuilding a tree object and that of checking whether it changes are the same ?
         if (pair.second->getObjectType() == ObjectType::kTree) {
             continue;
         }
@@ -84,12 +95,19 @@ SHAString Index::writeTree(bool verbose) {
         TreeNode *last = &head;
         for (const Path &sub: pair.first) {
             last = &(last->getOrAdd(sub));
-            last->self_description.filename_ = sub; // prepare for tree object
+            last->self_description.filename_ = sub; // provide info for tree objects in the traversal
         }
         last->self_description = pair.second->getTreeItem();
     }
 
-    traversalTreeStructure(head, verbose);
+    FIFOQueue queue;
+    traversalTreeStructure(head, queue, verbose);
+    
+    queue.front().filename = "R";
+    for (;!queue.empty();queue.pop()) {
+        DirectoryFile &entry = queue.front();
+        Index::getInstance().addEntry(entry);
+    }
 
     return head.self_description.hash_;
 }

@@ -16,7 +16,7 @@ class UpdateIndexTest: public IndexTestBase {
  protected:
     void SetUp() override{
         cleanMemory();
-        cleanDisk();
+        // cleanDisk();
     }
 };
 

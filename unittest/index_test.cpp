@@ -64,13 +64,34 @@ TEST_F(IndexTest, SimpleTest2) {
     compareOneEntry("2.txt", "sha222333");
 }
 
-
 TEST_F(IndexTest, TestIndexOutput) {
     indexOperation();
     std::ofstream ofs(index_path);
     ASSERT_TRUE(ofs.is_open());
     ofs << index();
     ofs.close();
+
+    std::string s=readFile(index_path);
+    ASSERT_EQ(s, index_file_standard);
+}
+
+TEST_F(IndexTest, TestIndexOutputMixedBlobTree) {
+    index().addEntry(RegularFile(
+        FileMode::kRegular, 0, "70c379b63ffa0795fdbfbc128e5a2818397b7ef8", "1.txt"
+        ));
+    index().addEntry(DirectoryFile(
+        FileMode::kDirectories, 0, "d2a17cf8ec20d54159d656367b3b6de8f5ff9668", "R"
+        ));
+
+    std::ofstream ofs(index_path);
+    ASSERT_TRUE(ofs.is_open());
+    ofs << index();
+    ofs.close();
+    std::string index_file_standard = "DIRC\n"
+                                "100644 blob 0 70c379b63ffa0795fdbfbc128e5a2818397b7ef8\n"
+                                "1.txt\n"
+                                "040000 tree 0 d2a17cf8ec20d54159d656367b3b6de8f5ff9668\n"
+                                "R\n";
 
     std::string s=readFile(index_path);
     ASSERT_EQ(s, index_file_standard);
