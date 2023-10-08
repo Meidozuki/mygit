@@ -18,7 +18,12 @@ package_end()
 add_requires("cryptopp")
 add_requires("gtest")
 
-files = {"src/GitHashObject.cpp", "src/objects.cpp", "src/index.cpp", "src/GitUpdateIndex.cpp", "src/GitWriteTree.cpp"}
+files = {"src/GitHashObject.cpp", 
+    "src/objects.cpp", 
+    "src/index.cpp", 
+    "src/GitUpdateIndex.cpp", 
+    "src/GitWriteTree.cpp",
+    "src/GitCommitTree.cpp"}
 
 target("src_lib")
     set_kind("static")

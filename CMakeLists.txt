@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_FLAGS -O0)
 
 set(SRC_FILES src/GitHashObject.cpp src/objects.cpp src/index.cpp
-        src/GitUpdateIndex.cpp src/GitWriteTree.cpp)
+        src/GitUpdateIndex.cpp src/GitWriteTree.cpp src/GitCommitTree.cpp)
 add_library(src_lib STATIC ${SRC_FILES})
 target_precompile_headers(src_lib PUBLIC src/precompile.h)
 

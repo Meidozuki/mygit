@@ -80,3 +80,38 @@ class Tree: public GitObject {
         num_entries = -1;
     }
 };
+
+struct Author{
+    std::string name, email;
+    long long int timestamp;
+    int time_zone;
+
+    Author(): name(),email(),timestamp(0),time_zone(0) {}
+
+    std::string string() const {
+        return name + " <" + email + "> " +\
+            std::to_string(timestamp) + " " + std::to_string(time_zone);
+    }
+};
+
+class Commit: public GitObject {
+ public:
+    SHAString tree_, parent_;
+    Author author, committer;
+    std::string message;
+
+    Commit():tree_(),parent_(),author(),committer(),message() {type_ = ObjectType::kCommit;}
+    Commit(SHAString tree):Commit() {tree_ = tree;}
+    // Commit(SHAString tree, SHAString parent):Commit(tree) {parent_ = parent;}
+
+    std::string freeze() const override {
+        using namespace std::literals::string_literals;
+        std::string parents = "\n"s;
+        if (!parent_.empty()) {
+            parents += "parent "s + parents.data() + "\n"s;
+        }
+        return "tree "s + tree_.data() + parents +\
+            "author "s + author.string() + "\ncommitter "s + committer.string() +\
+            "\n\n"s + message;
+     }
+};

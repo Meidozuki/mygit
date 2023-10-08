@@ -10,6 +10,6 @@ using std::cout;
 int main () {
 
 
-    std::cout << filesys::exists(".");
+    std::cout << std::is_trivially_copyable_v<std::string_view>;
 
 }

@@ -86,6 +86,14 @@ class GitObjectsProxy {
         }
     }
 
+    Option<std::string> catFile(SHAString hash) const {
+        auto path = getFilePath(hash);
+        auto content = path.map<std::string>([](const std::string& path){
+            return readFile(path);
+            });
+        return content;
+    }
+
 
     /**
      * convenient wrapper to hash an already-built object (i.e. tree object).
@@ -103,3 +111,12 @@ class GitObjectsProxy {
     GitObjectsProxy() = default;
     ~GitObjectsProxy() = default;
 };
+
+inline std::string catFile(SHAString hash) {
+    if (auto str = GitObjectsProxy::getInstance().catFile(hash)) {
+        return str.value();
+    }
+    else {
+        throw std::invalid_argument("hash does not exist.");
+    }
+}
