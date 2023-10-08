@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 project(mygit)
 
 set(CMAKE_CXX_STANDARD 17)
-add_executable(mygit main.cpp GitHashObject.cpp)
+set(CMAKE_CXX_FLAGS -O0)
+add_executable(mygit main.cpp GitHashObject.cpp objects.hpp GitUpdateIndex.cpp GitUpdateIndex.hpp)
 
 add_library(crypto_lib STATIC IMPORTED)
 

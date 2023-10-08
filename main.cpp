@@ -1,14 +1,28 @@
 #include <iostream>
 #include <string>
 #include <optional>
+#include <string_view>
+#include <sstream>
+#include <fstream>
+using namespace std::string_view_literals;
 
 #include "GitHashObject.hpp"
 
 int main() {
-    std::cout << std::string("AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D").size() << '\n';
+//    std::cout << hashObject("what is up, doc?") << std::endl;
+//    std::cout << hashObject("what is up, doc?\0") << std::endl;
+//
 
-    std::cout << "AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D" << '\n'\
-        << HashObject("hello");
 
-    return 0;
+    std::ifstream fs("../test.txt");
+    std::cout << readStream(fs,100) << "|\n";
+
+    int n;
+    fs=std::ifstream("../test.txt");
+    fs >> n;
+    std::cout << n << '\n';
+    std::cout << readStream(fs,100) << "|\n";
+
+    std::cout << readFile("../test.txt");
+
 }

@@ -34,5 +34,8 @@
 .idea/
 cmake-build-debug*/
 
+build/
+CMakeFiles/
+
 cryptopp*/*
 !cryptopp*/cryptopp*.zip
