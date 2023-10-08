@@ -12,7 +12,9 @@
 #include <cryptopp/sha.h>
 #include <cryptopp/hex.h>
 
+#include "common.hpp"
 #include "objects.hpp"
+#include "objects_proxy.hpp"
 
 // Do a direct SHA1 hash on message
 SHAString hashObject(StringView msg) {
@@ -51,7 +53,7 @@ std::string getStringToHash(ObjectType type, const std::string& content) {
 
 /**
  *
- * @param msg The message to hash, which a header will be added to
+ * @param msg The message to hash, which later a header will be added to
  * @param arg_type
  * @param type
  * @param if_write
@@ -75,19 +77,25 @@ SHAString hashObjectInterface(StringView msg, InArgType arg_type, ObjectType typ
     std::string full = getStringToHash(type, original_str);
     // It allows string to string_view implicitly, but do it explicitly for clearness
     std::string_view view(full.c_str(), full.size());
-    SHAString encoded = hashObject(view);
+    // Hash header+content
+    SHAString hash = hashObject(view);
 
     if (if_write) {
-        // create GitObject
-        if (type == ObjectType::kBlob) {
-            Blob blob;
-            blob.content_ = original_str;
-            blob.sha1_ = encoded.data();
-            // call Proxy to save GitObject
-            GitObjectsManager::getInstance().save(blob);
+        // Get path to save
+        auto &objects_proxy = GitObjectsManager::getInstance();
+        objects_proxy.insert(hash);
+        Path file_path = objects_proxy.getFilePath(hash).value(); // no failure
+        
+        // Open file to save
+        std::filesystem::create_directories(file_path.parent_path());
+        std::ofstream fs(file_path);
+        if (fs.is_open()) {
+            fs << full;
         }
-
+        else {
+            std::cerr << "Open file " << std::quoted(hash) << " failed when saving it.\n";
+        }
     }
 
-    return encoded;
+    return hash;
 }

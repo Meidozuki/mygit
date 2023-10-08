@@ -13,15 +13,6 @@ using namespace std::string_view_literals;
 #include "GitHashObject.hpp"
 #include "sha1_proxy.hpp"
 
-namespace test{
-class A{
-    int x;
- public:
-    A() =default;
-};
-
-}
-
 
 int main() {
 
@@ -35,7 +26,7 @@ int main() {
     std::string_view view(s);
 
     std::cout << hashObject(view) << '\n';
-    std::cout << hashObjectInterface("test content") << '\n';
+    std::cout << hashObjectInterface("test content", InArgType::kRawString, ObjectType::kBlob, true) << '\n';
 
 
 }

@@ -21,9 +21,6 @@ SHAString hashObjectInterface(StringView msg,
                                ObjectType type = ObjectType::kBlob,
                                bool if_write = false);
 
-class GitObject;
-StringType hashObjectWrite(GitObject &object);
-StringType hashObject(const GitObject &object);
 
 #include <cstdio>
 static bool testSSO() {

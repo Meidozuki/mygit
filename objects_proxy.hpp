@@ -23,6 +23,11 @@ class GitObjectsManager {
         return set_.find(hash) != set_.end();
     }
 
+    /**
+     * 
+     * @param hash 
+     * @return The iterator to the hash
+     */
     auto insert(HashArg hash) {
         auto insert_result = set_.insert(hash);
         return insert_result.first;
