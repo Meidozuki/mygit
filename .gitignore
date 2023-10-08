@@ -31,12 +31,29 @@
 *.out
 *.app
 
-.idea/
-cmake-build-debug*/
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
 
+.idea/
+cmake-build*/
+
+.gitpod.yml
 .vscode/
 build/
-CMakeFiles/
+
+.xmake/
 
 cryptopp*/*
 !cryptopp*/cryptopp*.zip
+!cryptopp*/build.sh
+!cryptopp/CMakeLists.txt

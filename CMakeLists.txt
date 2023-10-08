@@ -9,13 +9,15 @@ add_executable(mygit main.cpp ${SRC_FILES})
 
 target_precompile_headers(mygit PUBLIC precompile.h)
 
-add_library(crypto_lib STATIC IMPORTED)
+# add_library(crypto_lib STATIC IMPORTED)
 
-set(lib_prefix ${PROJECT_SOURCE_DIR}/cryptopp)
-set_target_properties(crypto_lib PROPERTIES
-        IMPORTED_LOCATION ${lib_prefix}/lib/libcryptopp.a)
+# set(lib_prefix ${PROJECT_SOURCE_DIR}/cryptopp)
+# set_target_properties(crypto_lib PROPERTIES
+#         IMPORTED_LOCATION ${lib_prefix}/lib/libcryptopp.a)
 
-target_link_libraries(mygit PUBLIC crypto_lib)
-target_include_directories(mygit PUBLIC ${lib_prefix}/include)
+add_subdirectory(cryptopp)
+
+target_link_libraries(mygit PUBLIC Crypto_LIB)
+target_include_directories(mygit PUBLIC ${Crypto_INCLUDE_DIR}/include)
 
 add_subdirectory(unittest)
