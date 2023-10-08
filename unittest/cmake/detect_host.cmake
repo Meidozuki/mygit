@@ -18,9 +18,9 @@ if (${WSL_file_permission})
     endif()
 endif()
 
-file(WRITE "config.h.in" 
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/config.h.in" 
 "#cmakedefine Windows_file_permission
 #cmakedefine Linux_file_permission
 #cmakedefine WSL_file_permission")
 
-configure_file(config.h.in config.h)
+configure_file(${CMAKE_CURRENT_BINARY_DIR}/config.h.in config.h)

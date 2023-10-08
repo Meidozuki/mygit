@@ -9,7 +9,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-include(detect_host.cmake)
+include(cmake/detect_host.cmake)
 
 add_executable(
         hello_test

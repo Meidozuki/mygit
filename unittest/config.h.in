@@ -1,3 +1,0 @@
-#cmakedefine Windows_file_permission
-#cmakedefine Linux_file_permission
-#cmakedefine WSL_file_permission

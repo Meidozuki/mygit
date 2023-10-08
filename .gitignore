@@ -43,6 +43,7 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+*\[*\]_include.cmake
 
 .idea/
 cmake-build*/
@@ -57,3 +58,5 @@ cryptopp*/*
 !cryptopp*/cryptopp*.zip
 !cryptopp*/build.sh
 !cryptopp/CMakeLists.txt
+
+unittest/config.h.in
