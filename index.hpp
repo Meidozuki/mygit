@@ -7,8 +7,11 @@
 #include "precompile.h"
 
 #include <filesystem>
+#include <map>
+#include <memory>
 
 #include "common.hpp"
+#include "sha1_proxy.hpp"
 #include "objects.hpp"
 
 
@@ -76,5 +79,5 @@ class Index{
 
     using Path = std::filesystem::path;
     using ShaStored = std::string;
-//    std::map<Path, ShaStored> dict;
+    std::map<SHAString, std::unique_ptr<IndexEntry>> dict_;
 };

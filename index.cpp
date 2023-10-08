@@ -6,24 +6,26 @@
 
 #include "GitHashObject.hpp"
 
+using std::unique_ptr;
+
 void Index::updateIndex(const Path &filename, std::error_code &ec) noexcept {
     namespace filesys = std::filesystem;
     if (filesys::exists(filename, ec)) {
         if (filesys::is_regular_file(filename, ec)) {
-            RegularFile file;
-            file.file_mode = FileMode::kRegular;
-            file.file_size = filesys::file_size(filename, ec);
-            file.filename = filename.string();
+            auto file = std::make_unique<RegularFile>();
+            file->file_mode = FileMode::kRegular;
+            file->file_size = filesys::file_size(filename, ec);
+            file->filename = filename.string();
 
             using filesys::perms;
             perms permission = filesys::status(filename).permissions();
             if ((permission & perms::owner_exec) != perms::none){
-                file.file_mode = FileMode::kRegularExecutable;
+                file->file_mode = FileMode::kRegularExecutable;
             }
 
-            std::string content = readFile(filename);
-            std::string sha1 = hashObject(content);
-            //TODO
+            SHAString sha1 = hashObjectInterface(filename.string(), InArgType::kFilename, ObjectType::kBlob, true);
+            // Add an item to the dict
+            dict_.emplace(sha1, std::move(file));
         }
         else if (filesys::is_directory(filename, ec)) {
             DirectoryFile file;

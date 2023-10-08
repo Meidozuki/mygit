@@ -44,6 +44,7 @@ class GitObjectsManager {
         }
     }
 
+    [[deprecated]]
     void save(const GitObject &object) {
         Option<SHAString> hash(object.sha1_);
         auto it = hash.map<IteratorType>(
