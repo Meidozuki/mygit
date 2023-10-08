@@ -3,7 +3,11 @@ project(mygit)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS -O0)
-add_executable(mygit main.cpp GitHashObject.cpp objects.hpp GitUpdateIndex.cpp GitUpdateIndex.hpp)
+
+set(SRC_FILES objects.hpp GitHashObject.cpp objects.cpp)
+add_executable(mygit main.cpp ${SRC_FILES})
+
+target_precompile_headers(mygit PUBLIC precompile.h)
 
 add_library(crypto_lib STATIC IMPORTED)
 
