@@ -39,34 +39,3 @@ void Tree::addItem(const TreeItem &item) {
         }
     }
 }
-
-void GitObjectsManager::save(const GitObject &object)  {
-    auto sha1 = object.sha1_;
-    Option<decltype(sha1)> hash(sha1);
-    auto it = hash.map<IteratorType>([this]
-                                         (HashArg x) {return this->insert(x);}
-    );
-
-    auto file_path = it.map<std::string>([this]
-                                             (const IteratorType &iterator) {return this->getFilePath(iterator);}
-    );
-
-    auto file = file_path.flatMap<bool>([&object]
-                                            // string can convert to path
-                                            (const std::filesystem::path &path)->Option<bool> {
-      std::filesystem::create_directories(path.parent_path());
-      std::ofstream fs(path);
-      if (fs.is_open()) {
-          auto &&content = object.freeze();
-          fs << object.type() << ' ' << content.size() << '\n' << content;
-          return true;
-      }
-      else {
-          return {};
-      }
-    });
-
-    if (!file.has_value()) {
-        std::cerr << "Save file " << std::quoted(sha1) << " failed\n";
-    }
-}

@@ -22,7 +22,7 @@ struct Option: public std::optional<T> {
     }
 
     template<typename NewType>
-    using MayFailFuncType = std::function< Option<NewType>(T) >;
+    using MayFailFuncType = std::function< Option<NewType>(const T&) >;
 
     using LogFuncType = std::function<void()>;
 
