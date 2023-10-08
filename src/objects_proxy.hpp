@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../precompile.h"
+#include "precompile.h"
 
 #include <set>
 #include <filesystem>

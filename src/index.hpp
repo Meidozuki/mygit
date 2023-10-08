@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../precompile.h"
+#include "precompile.h"
 
 #include <filesystem>
 #include <map>
@@ -57,6 +57,13 @@ struct RegularFile: IndexEntry {
     }
 };
 
+struct DryRunFile: RegularFile {
+    DryRunFile(const char *sha, VariableString fname)
+        : RegularFile(FileMode::kRegular, 0, sha,std::move(fname)) {}
+    
+    DryRunFile(SHAString sha, VariableString fname): DryRunFile(sha.data(), std::move(fname)) {}
+};
+
 struct DirectoryFile: IndexEntry {
     using IndexEntry::IndexEntry;
     DirectoryFile() {
@@ -74,10 +81,23 @@ struct DirectoryFile: IndexEntry {
 };
 
 class Index{
+ private:
+    std::map<SHAString, std::unique_ptr<IndexEntry>> dict_;
+    void insert(SHAString const& key, std::unique_ptr<IndexEntry>&& value) {
+        dict_.emplace(key, std::move(value));
+    }
  public:
     static Index& getInstance() {
         static Index instance;
         return instance;
+    }
+
+    const auto& getDict() {return dict_;}
+
+    template <typename T, std::enable_if_t<
+                          std::is_base_of_v<IndexEntry, T>>>
+    void addEntry(T &&val) {
+        insert(val.sha1, std::make_unique<T>(std::forward(val)));
     }
 
     void updateIndexCacheInfo(FileMode mode, const char *hash, std::filesystem::path path);
@@ -90,13 +110,6 @@ class Index{
  private:
     Index() = default;
     ~Index() = default;
-
-    using Path = std::filesystem::path;
-    using ShaStored = std::string;
-    std::map<SHAString, std::unique_ptr<IndexEntry>> dict_;
-    void insert(SHAString const& key, std::unique_ptr<IndexEntry>&& value) {
-        dict_[key] = std::move(value);
-    }
 
     friend std::ostream& operator<<(std::ostream& os, const Index &index);
     friend std::istream& operator>>(std::istream& is, Index &index);

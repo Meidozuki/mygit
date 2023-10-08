@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "../precompile.h"
+#include "precompile.h"
 
 #include <string_view>
 #include <cstring>
@@ -30,7 +30,9 @@ class SHA1Proxy {
             return strncmp(str, ano.str, 40) < 0;
         }
     };
-
+ private:
+    std::set<StringProxy> existing_;
+ public:
     bool find(const StringProxy& str) const {
         return existing_.find(str) != existing_.end();
     }
@@ -55,10 +57,6 @@ class SHA1Proxy {
         }
     }
 
- private:
-    std::set<StringProxy> existing_;
-
- public:
     std::optional<decltype(existing_)::iterator>
     retrieve(const StringProxy& str) {
         auto it = existing_.find(str);
