@@ -1,9 +1,15 @@
+#pragma once
+
 #include <cstdint>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
 
+using Path = std::filesystem::path;
+using VariableString = std::string;
+
+#pragma region Enums
 enum class ObjectType: uint8_t{
     kBlob,
     kTree,
@@ -11,10 +17,31 @@ enum class ObjectType: uint8_t{
     kTag
 };
 
+// 实际上16bit刚好，为了输入输出方便先用十进制表示
+enum class FileMode: uint32_t {
+    kDirectories = 40000,
+    kRegular = 100644,
+    kRegularExecutable = 100755,
+    kSymbolicLink = 120000,
+    kGitLink = 160000
+};
+
 enum class InArgType: uint8_t{
     kRawString,
     kFilename
 };
+
+#pragma endregion
+
+#pragma region Classes
+struct GeneralRecord{
+    std::filesystem::path filename;
+    const char *hash;
+    FileMode file_mode;
+    ObjectType object_type;
+};
+
+#pragma endregion
 
 inline std::string readStream(std::ifstream &fs, std::streamsize n) {
     std::string buffer;

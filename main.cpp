@@ -2,27 +2,25 @@
 #include <string>
 #include <optional>
 #include <string_view>
-#include <sstream>
-#include <fstream>
+#include <memory>
+#include <type_traits>
+#include <set>
 using namespace std::string_view_literals;
 
-#include "GitHashObject.hpp"
+#include "FP_util.hpp"
+#include "objects.hpp"
+//#include "GitHashObject.hpp"
+
 
 int main() {
-//    std::cout << hashObject("what is up, doc?") << std::endl;
-//    std::cout << hashObject("what is up, doc?\0") << std::endl;
-//
 
+    Blob t;
+    t.type_=ObjectType::kBlob;
+    t.sha1_="test sha";
+    t.content_ ="test test";
+    GitObjectsManager::getInstance().save(t);
 
-    std::ifstream fs("../test.txt");
-    std::cout << readStream(fs,100) << "|\n";
+    std::cout << sizeof(std::string) << ' ' << sizeof(std::array<char,40>);
 
-    int n;
-    fs=std::ifstream("../test.txt");
-    fs >> n;
-    std::cout << n << '\n';
-    std::cout << readStream(fs,100) << "|\n";
-
-    std::cout << readFile("../test.txt");
 
 }

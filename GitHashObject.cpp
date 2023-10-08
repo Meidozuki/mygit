@@ -21,7 +21,7 @@ StringType hashObject(const SV msg) {
     static_assert(std::is_same_v<const char*, decltype(msg.data())>);
     sha1.Update((const byte*)msg.data(), msg.size());
     binary_digest.resize(sha1.DigestSize());
-    sha1.Final((byte*)binary_digest.c_str());
+    sha1.Final((byte*)binary_digest.data());
 
     bool uppercase = false;
     StringSource(binary_digest, true, new HexEncoder(
