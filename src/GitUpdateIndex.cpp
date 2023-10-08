@@ -11,8 +11,13 @@ void updateIndex(Index &index, const Path &filename, std::error_code &ec) {
             RegularFile file;
             file.filename = filename.string();
             file.file_size = filesys::file_size(filename, ec);
-            // The git's behavior is to recognize a file as read-only, then mannually chmod +x
             file.file_mode = FileMode::kRegular;
+            
+            // Linux version only.
+            perms permission = filesys::status(filename).permissions();
+            if ((permission & perms::owner_exec) != perms::none){
+                file.file_mode = FileMode::kRegularExecutable;
+            }
 
             SHAString sha1 = hashObjectInterface(filename.string(), InArgType::kFilename, ObjectType::kBlob, true);
             file.sha1 = sha1.data();

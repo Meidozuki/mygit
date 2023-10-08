@@ -9,6 +9,8 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
+include(detect_host.cmake)
+
 add_executable(
         hello_test
         test_main.cpp
@@ -16,12 +18,10 @@ add_executable(
 target_link_libraries(
         hello_test
         GTest::gtest_main
-        src_lib
-)
+        src_lib)
 target_include_directories(
         hello_test PUBLIC
-        ${CMAKE_SOURCE_DIR}/src
-)
+        ${CMAKE_SOURCE_DIR}/src)
 
 include(GoogleTest)
 gtest_discover_tests(hello_test)
@@ -32,9 +32,11 @@ function(combine_test arg_test_name arg_src_files)
             GTest::gtest_main
             src_lib)
     target_include_directories(${arg_test_name} PUBLIC
+            ${CMAKE_CURRENT_BINARY_DIR}
             ${CMAKE_SOURCE_DIR}/src)
     gtest_discover_tests(${arg_test_name})
 endfunction()
 
 combine_test(hash_object_test hash_object_test.cpp)
 combine_test(index_alone_test index_test.cpp)
+combine_test(update_index_test update_index_test.cpp)

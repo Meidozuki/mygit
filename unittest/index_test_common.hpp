@@ -7,6 +7,7 @@
 
 #include "index.hpp"
 #include "common.hpp"
+#include "objects_proxy.hpp"
 
 class IndexTestBase: public ::testing::Test {
  private:
@@ -60,7 +61,17 @@ class IndexTestBase: public ::testing::Test {
         return mode == FileMode::kRegular || mode == FileMode::kRegularExecutable;
     }
 
-    bool isRegularFile(FileMode mode) {
-        return mode == FileMode::kRegular;
+    void chmod644(const Path &filename) {
+        using std::filesystem::perms;
+        filesys::permissions(filename,
+                            perms::owner_read | perms::owner_write | perms::group_read | perms::others_read,
+                            filesys::perm_options::replace);
+    }
+
+    void chmod755(const Path &filename) {
+        using std::filesystem::perms;
+        filesys::permissions(filename,
+                            perms::owner_all  | perms::group_read | perms::group_exec | perms::others_read | perms::others_exec,
+                            filesys::perm_options::replace);
     }
 };

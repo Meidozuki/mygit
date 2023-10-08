@@ -117,6 +117,17 @@ class Index{
         Path t(entry.filename);
         return insert(t.lexically_normal(), std::make_unique<T>(std::move(entry)));
     }
+    
+    bool chmod(const Path &path, bool isExec) {
+        auto it = dict_.find(path);
+        if (it != dict_.end()) {
+            it->second->chmod(isExec);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     SHAString writeTree(bool verbose=false);
 
