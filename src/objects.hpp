@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <string>
+#include <chrono>
 
 #include "common.hpp"
 #include "sha1_proxy.hpp"
@@ -84,9 +85,9 @@ class Tree: public GitObject {
 struct Author{
     std::string name, email;
     long long int timestamp;
-    int time_zone;
+    TimeZone time_zone;
 
-    Author(): name(),email(),timestamp(0),time_zone(0) {}
+    Author(): name(),email(),timestamp(0),time_zone() {}
 
     std::string toString() const ;
 };

@@ -1,18 +1,11 @@
-package("unittest-cmake-wrap")
-    on_load(function(package)
-        local configs = {}
-        local options = {}
-        -- options["cmake_generator"]="Unix Makefiles"
-        import("package.tools.cmake").build(package, configs, options)
-    end)
-package_end()
 
 target("unittest_cmake_wrapper")
     add_packages("gtest")
     add_files("main_body.cpp")
     add_includedirs("$(projectdir)/unittest/cmake", {public = true})
     before_build(function (target)
-        os.run("cmake $(projectdir)/unittest/cmake")
+        local dir = "$(projectdir)/unittest/cmake"
+        os.run("cmake -S "..dir .." -B "..dir)
     end)
 
 target("unittest")

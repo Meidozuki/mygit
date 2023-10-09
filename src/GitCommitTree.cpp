@@ -11,7 +11,7 @@ Author getDefaultAuthor() {
     temp.name="DEFAULT_USER";
     temp.email="DEFAULT_EMAIL";
     temp.timestamp=666666;
-    temp.time_zone=8;
+    temp.time_zone={8,0};
     return temp;
 }
 

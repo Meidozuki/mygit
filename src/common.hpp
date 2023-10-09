@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstdio>
 #include <cstdint>
+#include <cassert>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -50,11 +52,41 @@ enum class InArgType: uint8_t{
 #pragma endregion
 
 #pragma region Classes
-struct GeneralRecord{
-    std::filesystem::path filename;
-    const char *hash;
-    FileMode file_mode;
-    ObjectType object_type;
+template<typename T, T modulo_n>
+struct CongruenceClass {
+    T value;
+
+    CongruenceClass() = default;
+    explicit CongruenceClass(T x):value(x % modulo_n) {}
+    explicit CongruenceClass(int x):value(x % modulo_n) {if (value < 0) value += modulo_n;}
+
+    CongruenceClass operator+(const CongruenceClass& ano) {
+        return value + ano.value;
+    }
+    CongruenceClass operator-() {
+        return modulo_n - value;
+    }
+};
+
+struct TimeZone {
+    bool positive;
+    CongruenceClass<uint8_t, 24> hour;
+    CongruenceClass<uint8_t, 60> minute;
+
+    TimeZone(): positive(true),hour(0),minute(0) {}
+    TimeZone(int hh, int mm):
+        positive(hh >= 0),hour(std::abs(hh)),minute(mm) {
+        assert(hh >= -12 && hh <= 12);
+        assert(mm >= 0 && mm < 60);
+    }
+
+    friend std::ostream& operator<<(std::ostream &os, const TimeZone &tz) {
+        char c = tz.positive ? '+' : '-';
+        char str[8];
+        snprintf(str, 8, "%c%02d%02d", c, tz.hour.value, tz.minute.value);
+        os << str;
+        return os;
+    }
 };
 
 #pragma endregion

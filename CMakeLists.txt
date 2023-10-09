@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(SRC_FILES src/GitHashObject.cpp src/objects.cpp src/index.cpp
         src/GitUpdateIndex.cpp src/GitWriteTree.cpp src/GitCommitTree.cpp)
 add_library(src_lib STATIC ${SRC_FILES})
-target_precompile_headers(src_lib PUBLIC src/precompile.h)
+target_precompile_headers(src_lib PRIVATE src/precompile.h)
 
 add_executable(mygit src/main.cpp)
 add_executable(debug_test src/one_file_test.cpp)

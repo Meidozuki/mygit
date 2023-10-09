@@ -9,7 +9,8 @@ using std::cout;
 
 int main () {
 
-
-    std::cout << std::is_trivially_copyable_v<std::string_view>;
-
+    TimeZone t{12,30};
+    cout << t<< '\n';
+    cout << (-5%3) << '\n';
+    cout << std::is_trivially_copyable_v<TimeZone>;
 }
