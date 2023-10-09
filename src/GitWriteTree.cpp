@@ -13,7 +13,7 @@ struct TreeNode {
     using PathToParent = Path;
     std::map<PathToParent, TreeNode> children;
 
-    TreeItem self_description;
+    TreeItem node_description;
 
     TreeNode& getOrAdd(const PathToParent &key){
         if (children.find(key) == children.end()) {
@@ -41,13 +41,13 @@ void traversalTreeStructure(TreeNode &root, FIFOQueue &FIFO, bool verbose=false)
         Tree tree_object;
         for (auto &pair: root.children) {
             if (verbose) {
-                std::cout << "sub-items of " << root.self_description.filename_ << ": " << pair.first << std::endl;
+                std::cout << "sub-items of " << root.node_description.filename_ << ": " << pair.first << std::endl;
             }
             traversalTreeStructure(pair.second, FIFO, verbose);
             
-            TreeItem& item = pair.second.self_description;
+            TreeItem& item = pair.second.node_description;
             item.filename_ = item.filename_.filename(); //convert to relative
-            tree_object.addItem(std::move(pair.second.self_description));
+            tree_object.addItem(std::move(pair.second.node_description));
         }
         root.children.clear();
 
@@ -57,15 +57,15 @@ void traversalTreeStructure(TreeNode &root, FIFOQueue &FIFO, bool verbose=false)
         
         // extension: 写入到index中
         entry.sha1 = hash.data();
-        entry.filename = root.self_description.filename_;
+        entry.filename = root.node_description.filename_;
 
         // return the result to the caller
-        root.self_description.hash_ = hash.data();
-        root.self_description.file_mode_ = FileMode::kDirectories;
-        root.self_description.object_type_ = ObjectType::kTree;
+        root.node_description.hash_ = hash.data();
+        root.node_description.file_mode_ = FileMode::kDirectories;
+        root.node_description.object_type_ = ObjectType::kTree;
 
         if (verbose) {
-            std::cout << "Create tree object " << hash << " for folder " << root.self_description.filename_ << std::endl;
+            std::cout << "Create tree object " << hash << " for folder " << root.node_description.filename_ << std::endl;
         }
     }
 }
@@ -95,9 +95,9 @@ SHAString Index::writeTree(bool verbose) {
         TreeNode *last = &head;
         for (const Path &sub: pair.first) {
             last = &(last->getOrAdd(sub));
-            last->self_description.filename_ = sub; // provide info for tree objects in the traversal
+            last->node_description.filename_ = sub; // provide info for tree objects in the traversal
         }
-        last->self_description = pair.second->getTreeItem();
+        last->node_description = pair.second->getTreeItem();
     }
 
     FIFOQueue queue;
@@ -109,7 +109,7 @@ SHAString Index::writeTree(bool verbose) {
         Index::getInstance().addEntry(entry);
     }
 
-    return head.self_description.hash_;
+    return head.node_description.hash_;
 }
 
 

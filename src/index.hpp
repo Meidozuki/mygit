@@ -26,8 +26,8 @@ struct IndexEntry {
     VariableString filename;
 
     IndexEntry() = default;
-    IndexEntry(FileMode mode, FileSizeType size, const char *sha, VariableString fname)
-        : file_mode(mode), file_size(size), sha1(sha), filename(std::move(fname)) {}
+    IndexEntry(FileMode mode, FileSizeType size, const char *hash, VariableString fname)
+        : file_mode(mode), file_size(size), sha1(hash), filename(std::move(fname)) {}
 
     virtual ObjectType getObjectType() const = 0;
 
@@ -59,11 +59,11 @@ struct RegularFile: IndexEntry {
 };
 
 struct DryRunFile: RegularFile {
-    DryRunFile(const char *sha, VariableString fname)
-        : RegularFile(FileMode::kRegular, 0, sha, std::move(fname)) {}
+    DryRunFile(const char *hash, VariableString fname)
+        : RegularFile(FileMode::kRegular, 0, hash, std::move(fname)) {}
     
-    DryRunFile(SHAString sha, VariableString fname)
-        : DryRunFile(sha.data(), std::move(fname)) {}
+    DryRunFile(SHAString hash, VariableString fname)
+        : DryRunFile(hash.data(), std::move(fname)) {}
 };
 
 struct DirectoryFile: IndexEntry {
@@ -139,7 +139,7 @@ class Index{
     /**
      * The proxy to insert items to the dict.
      * WARNING: Don't insert entry with it unless you are sure. Use addEntry instead.
-     * @param key a rvalue std::string
+     * @param key a rvalue std::toString
      * @param value a unique_ptr, which is rvalue only
      */
     bool insert(Path &&key, std::unique_ptr<IndexEntry>&& value) {

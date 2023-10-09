@@ -10,6 +10,7 @@
 #include <array>
 #include <set>
 #include <optional>
+#include <stdexcept>
 
 class SHA1Proxy {
  public:

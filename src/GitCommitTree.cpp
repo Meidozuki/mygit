@@ -15,17 +15,17 @@ Author getDefaultAuthor() {
     return temp;
 }
 
-SHAString commitTree(SHAString tree, Option<SHAString> parent, std::string message) {
+SHAString commitTree(std::string message, SHAString tree, Option<SHAString> parent) {
     Commit commit(tree);
     if (parent.has_value()) {
         commit.parent_ = parent.value();
     }
 
-    commit.author = commit.committer = getDefaultAuthor();
+    commit.author_ = commit.committer_ = getDefaultAuthor();
     if (message.empty()) {
         throw std::invalid_argument("commit message cannot be empty.");
     }
-    commit.message = std::move(message);
+    commit.message_ = std::move(message);
 
     return hashObjectInterface(commit.freeze(), InArgType::kRawString, ObjectType::kCommit, true);
 }

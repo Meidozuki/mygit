@@ -66,18 +66,18 @@ struct TreeItem {
 
 class Tree: public GitObject {
  private:
-    int num_entries, num_subtrees;
+    int num_entries_, num_subtrees_;
  public:
     std::vector<TreeItem> sub_items_;
 
-    Tree():sub_items_(),num_entries(0),num_subtrees(0) {type_ = ObjectType::kTree;}
+    Tree(): sub_items_(), num_entries_(0), num_subtrees_(0) { type_ = ObjectType::kTree;}
 
     std::string freeze() const override;
 
     void addItem(TreeItem item);
 
     void cacheTreeInvalidate() {
-        num_entries = -1;
+        num_entries_ = -1;
     }
 };
 
@@ -88,30 +88,18 @@ struct Author{
 
     Author(): name(),email(),timestamp(0),time_zone(0) {}
 
-    std::string string() const {
-        return name + " <" + email + "> " +\
-            std::to_string(timestamp) + " " + std::to_string(time_zone);
-    }
+    std::string toString() const ;
 };
 
 class Commit: public GitObject {
  public:
     SHAString tree_, parent_;
-    Author author, committer;
-    std::string message;
+    Author author_, committer_;
+    std::string message_;
 
-    Commit():tree_(),parent_(),author(),committer(),message() {type_ = ObjectType::kCommit;}
+    Commit(): tree_(), parent_(), author_(), committer_(), message_() {type_ = ObjectType::kCommit;}
     Commit(SHAString tree):Commit() {tree_ = tree;}
-    // Commit(SHAString tree, SHAString parent):Commit(tree) {parent_ = parent;}
+    Commit(SHAString tree, SHAString parent):Commit(tree) {parent_ = parent;}
 
-    std::string freeze() const override {
-        using namespace std::literals::string_literals;
-        std::string parents = "\n"s;
-        if (!parent_.empty()) {
-            parents += "parent "s + parents.data() + "\n"s;
-        }
-        return "tree "s + tree_.data() + parents +\
-            "author "s + author.string() + "\ncommitter "s + committer.string() +\
-            "\n\n"s + message;
-     }
+    std::string freeze() const override;
 };

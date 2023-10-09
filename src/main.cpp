@@ -19,9 +19,6 @@ using namespace std::string_view_literals;
 #include "GitCommitTree.hpp"
 
 int main() {
-//    index.addEntry<DryRunFile>(DryRunFile("70c379b63ffa0795fdbfbc128e5a2818397b7ef8","1.txt"));
-//    index.addEntry<DryRunFile>(DryRunFile("sha222","f1/2.txt"));
-//    index.addEntry<DryRunFile>(DryRunFile("sha333","f1/f2/3.txt"));
 
     // Index &index = Index::getInstance();
     // hashObjectInterface("Hello world", InArgType::kRawString, ObjectType::kBlob, true);
@@ -29,7 +26,7 @@ int main() {
     // SHAString sha= index.writeTree(false);
     // std::cout << sha << '\n';
     
-    auto hash= commitTree("tree",{},"message");
+    auto hash= commitTree("message", "tree");
     std::cout << hash << std::endl;
     std::cout << catFile(hash) << '\n';
 
