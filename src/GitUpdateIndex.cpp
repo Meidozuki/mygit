@@ -1,9 +1,12 @@
 #include "GitUpdateIndex.hpp"
 
 #include <stdexcept>
+#include <functional>
 
 #include "objects.hpp"
 #include "GitHashObject.hpp"
+
+using FuncWithNoArg = std::function<void()>;
 
 void updateIndex(Index &index, const Path &filename, std::error_code &ec) {
     if (filesys::exists(filename, ec)) {
@@ -35,7 +38,55 @@ void updateIndex(Index &index, const Path &filename, std::error_code &ec) {
     }
 }
 
+struct Throwing{
+    std::string msg;
+    Throwing() = default;
+    Throwing(std::string s):msg(std::move(s)) {}
+
+    [[noreturn]]
+    void operator()() const {throw std::logic_error(msg);}
+};
+
+struct IndexAddStrategy{
+    Index &index_;
+    RegularFile entry_;
+    IndexAddStrategy(Index &index,RegularFile entry):index_(index),entry_(std::move(entry)) {}
+    void operator()() {
+        index_.addEntry(std::move(entry_));
+    }
+};
+
+struct IndexRemoveStrategy{
+    Index &index_;
+    Path &path_;
+    IndexRemoveStrategy(Index &index, Path &path) : index_(index), path_(path) {}
+    void operator()() {
+        index_.erase(path_);
+    }
+};
+
+
 void updateIndexCacheInfo(Index &index, FileMode mode, const char *hash, std::filesystem::path path, bool add){
+    auto index_entry_not_found_fn = [&]() -> FuncWithNoArg{
+        if (add) {
+            return IndexAddStrategy(index, RegularFile(mode, 0, SHA1Proxy::create_s(hash).data(), path.string()));
+        }
+        else {
+            return Throwing(path.string() + " entry is not in index and --add not set.");
+        }
+    }();
+
+    bool remove;
+    auto file_not_exist_fn = [&]() -> FuncWithNoArg{
+        if (remove) {
+            return IndexRemoveStrategy(index, path);
+        }
+        else {
+            return Throwing(path.string() + " file doesn't exist and --remove not set.");
+        }
+    }();
+
+
     if (!SHA1Proxy::find_s(hash)) {
         std::string msg = "invalid SHA1 value ";
         throw std::invalid_argument(msg + hash);
@@ -47,12 +98,6 @@ void updateIndexCacheInfo(Index &index, FileMode mode, const char *hash, std::fi
         ptr->sha1 = hash;
     }
     else {
-        if (add) {
-            index.addEntry(RegularFile(mode, 0, SHA1Proxy::create_s(hash).data(), path.string()));
-        }
-        else {
-            std::cerr << path << ": cannot add to the index - missing --add option?" << '\n';
-            return;
-        }
+        index_entry_not_found_fn();
     }
 }
