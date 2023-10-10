@@ -83,8 +83,10 @@ struct DirectoryFile: IndexEntry {
 };
 
 class Index{
+ public:
+    using IndexKey = Path;
  protected:
-    std::map<Path, std::unique_ptr<IndexEntry>> dict_;
+    std::map<IndexKey, std::unique_ptr<IndexEntry>> dict_;
     bool suppress_warning;
  public:
     static Index& getInstance() {
@@ -107,7 +109,7 @@ class Index{
     }
 
     // element access operations
-    bool find(const Path& x) {return dict_.find(x) != dict_.end();}
+    bool find(const IndexKey& x) {return dict_.find(x) != dict_.end();}
     const auto& getDict() {return dict_;}
 
     template <typename T, std::enable_if_t<
@@ -117,8 +119,12 @@ class Index{
         Path t(entry.filename);
         return insert(t.lexically_normal(), std::make_unique<T>(std::move(entry)));
     }
+
+    bool removeEntry(const IndexKey &path) {
+        return dict_.erase(path) != 0;
+    }
     
-    bool chmod(const Path &path, bool isExec) {
+    bool chmod(const IndexKey &path, bool isExec) {
         auto it = dict_.find(path);
         if (it != dict_.end()) {
             it->second->chmod(isExec);
@@ -142,7 +148,7 @@ class Index{
      * @param key a rvalue std::toString
      * @param value a unique_ptr, which is rvalue only
      */
-    bool insert(Path &&key, std::unique_ptr<IndexEntry>&& value) {
+    bool insert(IndexKey &&key, std::unique_ptr<IndexEntry>&& value) {
         if (!filesys::exists(key) && !suppress_warning) {
             std::cerr << "Trying to add a non-existing filepath " << key << " to index\n";
         }

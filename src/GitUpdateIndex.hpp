@@ -8,15 +8,8 @@
 #include "common.hpp"
 #include "index.hpp"
 
-void updateIndex(Index &index, const Path& filename, std::error_code &ec);
+void updateIndex(Index &index, const Path &filename, bool add=true, bool remove=false);
 
-inline void updateIndex(Index &index, const Path& filename) {
-    std::error_code ec;
-    updateIndex(index, filename, ec);
-    if ((bool) ec) {
-        std::cerr << ec.message() << '\n';
-    }
-}
 
 /**
  * @param mode
@@ -24,4 +17,4 @@ inline void updateIndex(Index &index, const Path& filename) {
  * @param path 可以为空路径，此时必须指定--add （对应的file size为0）。
  * @param add
  */
-void updateIndexCacheInfo(Index &index, FileMode mode, const char *hash, std::filesystem::path path, bool add=false);
+void updateIndexCacheInfo(Index &index, FileMode mode, const char *hash, Path filename, bool add=false, bool remove=false);
