@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdint>
 #include <cassert>
+#include <stdexcept>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -19,11 +20,12 @@ enum class ObjectType: uint8_t{
     kBlob,
     kTree,
     kCommit,
-    kTag
+    kTag,
+    kUnknownObject
 };
 
 // 实际上16bit刚好，为了输入输出方便先用十进制表示
-enum class FileMode: uint32_t {
+enum class FileMode: uint32_t{
     kDirectories = 40000,
     kRegular = 100644,
     kRegularExecutable = 100755,
@@ -31,25 +33,34 @@ enum class FileMode: uint32_t {
     kGitLink = 160000
 };
 
-[[gnu::const]]
-inline std::optional<FileMode> modeFromInt(uint32_t arg) {
-    switch (arg) {
-        case 40000: return FileMode::kDirectories;
-        case 100644: return FileMode::kRegular;
-        case 100755: return FileMode::kRegularExecutable;
-        case 120000: return FileMode::kSymbolicLink;
-        case 160000: return FileMode::kGitLink;
-        default: break;
-    }
-    return std::nullopt;
-}
-
 enum class InArgType: uint8_t{
     kRawString,
     kFilename
 };
 
 #pragma endregion
+
+[[gnu::const]]
+inline std::optional<FileMode> fileModeFromInt(uint32_t arg) noexcept {
+    switch (arg) {
+        case  40000: return FileMode::kDirectories;
+        case 100644: return FileMode::kRegular;
+        case 100755: return FileMode::kRegularExecutable;
+        case 120000: return FileMode::kSymbolicLink;
+        case 160000: return FileMode::kGitLink;
+        default:     return std::nullopt;
+    }
+}
+
+[[gnu::const]]
+inline std::optional<ObjectType> objectTypeFromString(const std::string &s) noexcept {
+    if (s == "blob") return ObjectType::kBlob;
+    else if (s == "tree") return ObjectType::kTree;
+    else if (s == "commit") return ObjectType::kCommit;
+    else if (s == "tag") return ObjectType::kTag;
+    else return std::nullopt;
+    (bool)(std::optional<ObjectType>());
+}
 
 #pragma region Classes
 template<typename T, T modulo_n>
@@ -90,6 +101,24 @@ struct TimeZone {
 };
 
 #pragma endregion
+
+struct ConditionCheck{
+    bool valid;
+    ConditionCheck() = default;
+    explicit ConditionCheck(bool b):valid(b) {}
+
+    void assertOrThrow(const std::exception &exception) {
+        if (!valid) {
+            throw exception;
+        }
+    }
+};
+
+inline void conditionCheck(bool valid, const std::exception &exception) {
+    ConditionCheck(valid).assertOrThrow(exception);
+}
+
+
 
 inline std::string readStream(std::ifstream &fs, std::streamsize n) {
     std::string buffer;

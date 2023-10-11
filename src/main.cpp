@@ -14,9 +14,9 @@ using namespace std::string_view_literals;
 #include "GitHashObject.hpp"
 #include "common.hpp"
 #include "objects_proxy.hpp"
-#include "index.hpp"
 #include "GitUpdateIndex.hpp"
 #include "GitCommitTree.hpp"
+#include "GitCatFile.hpp"
 
 int main() {
 
@@ -29,5 +29,7 @@ int main() {
     auto hash= commitTree("message", "tree");
     std::cout << hash << std::endl;
     std::cout << catFile(hash) << '\n';
+
+    std::cout << std::is_trivial_v<ConditionCheck> << '\n';
 
 }

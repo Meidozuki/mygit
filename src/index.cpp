@@ -1,6 +1,3 @@
-//
-// Created by user on 2023/9/16.
-//
 
 #include "index.hpp"
 
@@ -48,12 +45,12 @@ std::istream &operator>>(std::istream &is, Index &index) {
         int mode_s = 0;
         is >> mode_s;
         // If mode is invalid, others are supposed to be invalid too.
-        if (!modeFromInt(mode_s).has_value()) {
+        if (!fileModeFromInt(mode_s).has_value()) {
             is.setstate(std::ios::failbit);
             return is;
         }
 
-        FileMode mode = modeFromInt(mode_s).value();
+        FileMode mode = fileModeFromInt(mode_s).value();
         std::string type, hash, filename;
         int file_size;
         is >> type >> file_size >> hash; is.ignore();
@@ -70,7 +67,7 @@ std::istream &operator>>(std::istream &is, Index &index) {
                 is.setstate(std::ios::failbit);
                 return is;
             }
-            SHAString sha1(SHA1Proxy::create_s(hash.c_str()));
+            SHAString sha1(SHA1Proxy::invokeCreate(hash.c_str()));
             index.addEntry(DirectoryFile(mode, file_size, sha1.data(), std::move(filename)));
         }
         else if (mode == FileMode::kRegular || mode == FileMode::kRegularExecutable) {
@@ -79,7 +76,7 @@ std::istream &operator>>(std::istream &is, Index &index) {
                 is.setstate(std::ios::failbit);
                 return is;
             }
-            SHAString sha1(SHA1Proxy::create_s(hash.c_str()));
+            SHAString sha1(SHA1Proxy::invokeCreate(hash.c_str()));
             index.addEntry(RegularFile(mode, file_size, sha1.data(), std::move(filename)));
         }
     }

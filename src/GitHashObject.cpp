@@ -28,7 +28,7 @@ SHAString hashObject(StringView msg) {
             new StringSink(encoded), uppercase
             ));
 
-    return SHA1Proxy::create_s(encoded.c_str());
+    return SHA1Proxy::invokeCreate(encoded.c_str());
 }
 
 // whether to sync with git or for better deserialize

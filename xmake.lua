@@ -1,4 +1,4 @@
--- add_requires("conan::cryptopp/8.8.0")
+
 package("cryptopp")
     add_deps("cmake")
     set_sourcedir(path.join(os.scriptdir(), "cryptopp"))
@@ -18,12 +18,15 @@ package_end()
 add_requires("cryptopp")
 add_requires("gtest")
 
+set_languages("cxx17")
+
 files = {"src/GitHashObject.cpp", 
     "src/objects.cpp", 
     "src/index.cpp", 
     "src/GitUpdateIndex.cpp", 
     "src/GitWriteTree.cpp",
-    "src/GitCommitTree.cpp"}
+    "src/GitCommitTree.cpp",
+    "src/GitCatFile.cpp"}
 
 target("src_lib")
     set_kind("static")

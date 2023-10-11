@@ -121,7 +121,7 @@ void updateIndexCacheInfo(Index &index, FileMode mode, const char *hash, Path fi
     context.add = add;
     context.remove = remove;
 
-    if (!SHA1Proxy::find_s(hash)) {
+    if (!SHA1Proxy::invokeFind(hash)) {
         std::string msg = "invalid SHA1 value ";
         throw std::invalid_argument(msg + hash);
     }
@@ -133,7 +133,7 @@ void updateIndexCacheInfo(Index &index, FileMode mode, const char *hash, Path fi
     }
     else {
         auto createEntry = [&]() {
-            return RegularFile(mode, 0, SHA1Proxy::create_s(hash).data(), filename.string());
+            return RegularFile(mode, 0, SHA1Proxy::invokeCreate(hash).data(), filename.string());
         };
         context.getEntryNotExistLazyFn(createEntry, filename)();
     }

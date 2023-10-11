@@ -31,6 +31,10 @@ class GitObjectsProxy {
     static inline Path getGitDir() {return GIT_DIR;}
     [[gnu::const]]
     static inline Path getObjectsDir() {return GIT_DIR / "objects/";}
+    [[gnu::const]]
+    static inline Path getRefsDir() {return GIT_DIR / "refs/";}
+    [[gnu::const]]
+    static inline Path getHeadPath() {return GIT_DIR / "HEAD";}
 
     // initialize
     void initFromDisk() {
@@ -86,6 +90,41 @@ class GitObjectsProxy {
         }
     }
 
+    ObjectType getObjectType(SHAString hash) const {
+        auto path = getFilePath(hash);
+        if (path.has_value()) {
+            auto ss = readFileAsStream(path.value());
+            std::string type_s;
+            int n;
+            if (ss >> type_s >> n) {
+                if (auto type = objectTypeFromString(type_s);
+                    type.has_value()) {
+                    return type.value();
+                }
+            }
+            throw std::logic_error("cannot recognize object type");
+        }
+        else {
+            throw std::invalid_argument(std::string("cannot find object ") + hash.data());
+        }
+    }
+
+    ObjectType getObjectTypeNoExcept(SHAString hash) const noexcept {
+        auto path = getFilePath(hash);
+        if (path.has_value()) {
+            auto ss = readFileAsStream(path.value());
+            std::string type_s;
+            int n;
+            if (ss >> type_s >> n) {
+                if (auto type = objectTypeFromString(type_s);
+                    type.has_value()) {
+                    return type.value();
+                }
+            }
+        }
+        return ObjectType::kUnknownObject;
+    }
+
     Option<std::string> catFile(SHAString hash) const {
         auto path = getFilePath(hash);
         auto content = path.map<std::string>([](const std::string& path){
@@ -111,12 +150,3 @@ class GitObjectsProxy {
     GitObjectsProxy() = default;
     ~GitObjectsProxy() = default;
 };
-
-inline std::string catFile(SHAString hash) {
-    if (auto str = GitObjectsProxy::getInstance().catFile(hash)) {
-        return str.value();
-    }
-    else {
-        throw std::invalid_argument("hash does not exist.");
-    }
-}

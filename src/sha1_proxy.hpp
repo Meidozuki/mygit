@@ -122,10 +122,9 @@ class SHA1Proxy {
     }
 
     // Convenient wrappers
-    // C++禁止这种重载，所以使用后缀_s区分静态函数
-    static auto create_s(const char* hash) { return getInstance().create(hash);}
-    static auto remove_s(const char* hash) {return getInstance().remove(hash);}
-    static auto find_s(const StringProxy& str) {return getInstance().find(str);}
+    static auto invokeCreate(const char* hash) { return getInstance().create(hash);}
+    static auto invokeRemove(const char* hash) {return getInstance().remove(hash);}
+    static auto invokeFind(const StringProxy& str) {return getInstance().find(str);}
 
     // Singleton declare
     static SHA1Proxy& getInstance() {

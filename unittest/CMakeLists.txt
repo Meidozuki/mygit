@@ -37,6 +37,7 @@ function(combine_test arg_test_name arg_src_files)
     gtest_discover_tests(${arg_test_name})
 endfunction()
 
+combine_test(check_types checkTypeProperty.cpp)
 combine_test(hash_object_test hash_object_test.cpp)
 combine_test(index_alone_test index_test.cpp)
 combine_test(update_index_test update_index_test.cpp)
