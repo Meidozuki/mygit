@@ -59,7 +59,6 @@ inline std::optional<ObjectType> objectTypeFromString(const std::string &s) noex
     else if (s == "commit") return ObjectType::kCommit;
     else if (s == "tag") return ObjectType::kTag;
     else return std::nullopt;
-    (bool)(std::optional<ObjectType>());
 }
 
 #pragma region Classes

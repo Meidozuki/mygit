@@ -3,19 +3,29 @@
 #include <functional>
 #include <optional>
 
-template <typename T>
-struct Option: public std::optional<T> {
-    using Super = std::optional<T>;
+namespace FP {
+struct Unit {};
+
+template<typename Func>
+using FunctionArg = const std::function<Func> &;
+
+template<typename Inner>
+struct Option : public std::optional<Inner> {
+    using Super = std::optional<Inner>;
     using Super::Super;
 
-    const T& get() {return this->value();}
+    Option(std::optional<Inner> &&rhs) : Super(std::move(rhs)) {}
+
+    const Inner &get() { return this->value(); }
+    inline bool isEmpty() {return !this->has_value();}
+    inline bool nonEmpty() {return this->has_value();}
 
     // monad operations
     /**
      * @brief Perform a function that do not fail. Func arg is expected to pass by const&
      */
     template<typename NewType>
-    Option<NewType> map(const std::function<NewType(const T&)> &fn) {
+    Option<NewType> map(FunctionArg<NewType(const Inner &)> fn) {
         if (this->has_value()) {
             return Option<NewType>(fn(this->value()));
         }
@@ -28,7 +38,7 @@ struct Option: public std::optional<T> {
      * @brief Perform a function that may fail.
      */
     template<typename NewType>
-    Option<NewType> flatMap(const std::function< Option<NewType>(const T&)> &fn) {
+    Option<NewType> flatMap(FunctionArg<Option<NewType>(const Inner &)> fn) {
         if (this->has_value()) {
             return fn(this->value());
         }
@@ -40,7 +50,7 @@ struct Option: public std::optional<T> {
     /**
      * @brief If the option is empty, invoke fn and return the result
      */
-    Option<T> orElse(const std::function<T()> &fn) {
+    Option<Inner> orElse(FunctionArg<Inner()> fn) {
         if (!this->has_value()) {
             return fn();
         }
@@ -54,7 +64,7 @@ struct Option: public std::optional<T> {
      * WARNING: Do not continue with this chain as when the next orElse() called, something unexpected will happen
      * @return Option[None]
      */
-    Option<T> orElse(const std::function<void()> &fn) {
+    Option<Inner> orElse(FunctionArg<void()> fn) {
         if (!this->has_value()) {
             fn();
             return {};
@@ -68,12 +78,48 @@ struct Option: public std::optional<T> {
      * @brief A convenient wrapper. Perform a function that may fail. When failed, do `log_fn`
      */
     template<typename NewType>
-    Option<NewType> flatMap(const std::function< Option<NewType>(const T&)> &fn, const std::function<void()> &log_fn) {
+    Option<NewType> flatMap(FunctionArg<Option<NewType>(const Inner &)> fn, FunctionArg<void()> log_fn) {
         bool may_log = this->has_value();
         auto res = flatMap(fn);
         if (may_log)
             return res.orElse(log_fn);
-        else 
+        else
             return {};
     }
+
+    Option<Inner> filter(FunctionArg<bool(const Inner &)> predicate) {
+        return predicate(this->value()) ? *this : std::nullopt;
+    }
 };
+
+template<typename Inner>
+struct IO : public Option<Inner> {
+    using Super = Option<Inner>;
+    using Super::Super;
+
+    /**
+     * @brief Perform a function that do not fail. This func is meant for IO monad
+     */
+    template<typename NewType>
+    IO<NewType> map(FunctionArg<NewType(Inner &)> fn) {
+        if (this->has_value()) {
+            return fn(this->value());
+        } else {
+            return {};
+        }
+    }
+
+    template<typename NewType>
+    IO<NewType> flatMap(FunctionArg<Option<NewType>(Inner &)> fn) {
+        if (this->has_value()) {
+            return fn(this->value());
+        } else {
+            return {};
+        }
+    }
+
+};
+}
+
+using FP::Unit;
+using FP::Option;

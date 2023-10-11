@@ -90,48 +90,22 @@ class GitObjectsProxy {
         }
     }
 
-    ObjectType getObjectType(SHAString hash) const {
-        auto path = getFilePath(hash);
-        if (path.has_value()) {
-            auto ss = readFileAsStream(path.value());
-            std::string type_s;
-            int n;
-            if (ss >> type_s >> n) {
-                if (auto type = objectTypeFromString(type_s);
-                    type.has_value()) {
-                    return type.value();
-                }
-            }
-            throw std::logic_error("cannot recognize object type");
-        }
-        else {
-            throw std::invalid_argument(std::string("cannot find object ") + hash.data());
-        }
-    }
+    ObjectType getObjectType(SHAString hash) const;
 
-    ObjectType getObjectTypeNoExcept(SHAString hash) const noexcept {
-        auto path = getFilePath(hash);
-        if (path.has_value()) {
-            auto ss = readFileAsStream(path.value());
-            std::string type_s;
-            int n;
-            if (ss >> type_s >> n) {
-                if (auto type = objectTypeFromString(type_s);
-                    type.has_value()) {
-                    return type.value();
-                }
-            }
-        }
-        return ObjectType::kUnknownObject;
-    }
+    ObjectType getObjectTypeNoExcept(SHAString hash) const noexcept;
 
-    Option<std::string> catFile(SHAString hash) const {
+
+    Option<std::stringstream> readObject(SHAString hash) const {
         auto path = getFilePath(hash);
-        auto content = path.map<std::string>([](const std::string& path){
-            return readFile(path);
-            });
+        auto content = path.map<std::stringstream>([](const std::string& path){
+          return readFileAsStream(path);
+        });
         return content;
     }
+
+    Option<std::stringstream> readObjectNoHeader(SHAString hash) const;
+
+    Option<Commit> readCommitObject();
 
 
     /**
