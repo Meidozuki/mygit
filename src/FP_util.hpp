@@ -88,7 +88,7 @@ struct Option : public std::optional<Inner> {
     }
 
     Option<Inner> filter(FunctionArg<bool(const Inner &)> predicate) {
-        return predicate(this->value()) ? *this : std::nullopt;
+        return nonEmpty() && predicate(this->value()) ? *this : std::nullopt;
     }
 };
 
@@ -118,6 +118,9 @@ struct IO : public Option<Inner> {
         }
     }
 
+    IO<Inner> filter(FunctionArg<bool(const Inner &)> predicate) {
+        return this->nonEmpty() && predicate(this->value()) ? *this : std::nullopt;
+    }
 };
 }
 

@@ -20,10 +20,8 @@ std::string Tree::freeze() const {
 std::string Commit::freeze() const {
     std::stringstream ss;
     ss << "tree " << tree_ << '\n';
-    if (!parent_.empty()) {
-        ss << parent_ << '\n';
-    }
-    ss << "author " << author_.toString() << "\ncommitter " << committer_.toString() \
+    ss << "parent " << (parent_.empty() ? "nan" : parent_) << '\n';
+    ss << "author " << author_ << "\ncommitter " << committer_ \
         << "\n\n" << message_;
     return ss.str();
 }
@@ -44,17 +42,23 @@ void Tree::addItem(TreeItem item) {
     }
     // not exist, add to end
     else {
-        sub_items_.emplace_back(std::move(item));
         num_entries_++;
         if (item.object_type_ == ObjectType::kTree) {
             num_subtrees_++;
         }
+        sub_items_.emplace_back(std::move(item));
     }
 }
 
-std::string Author::toString() const {
-    std::stringstream ss;
-    ss << name << " <" << email << "> " << timestamp << ' '\
-        << std::setfill('0') << std::setw(4) << time_zone;
-    return ss.str();
+std::ostream& operator<<(std::ostream& os, const Author &author) {
+    os << author.name << " " << author.email << " " << author.timestamp << ' '\
+        << std::setfill('0') << std::setw(4) << author.time_zone;
+    return os;
+}
+
+std::istream& operator>>(std::istream& is, Author &author) {
+    int zone;
+    is >> author.name >> author.email >> author.timestamp >> zone;
+    author.time_zone = TimeZone(zone/100, zone%100);
+    return is;
 }

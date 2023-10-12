@@ -92,7 +92,7 @@ class GitObjectsProxy {
 
     ObjectType getObjectType(SHAString hash) const;
 
-    ObjectType getObjectTypeNoExcept(SHAString hash) const noexcept;
+    ObjectType getObjectTypeNoThrow(SHAString hash) const noexcept;
 
 
     Option<std::stringstream> readObject(SHAString hash) const {
@@ -105,7 +105,7 @@ class GitObjectsProxy {
 
     Option<std::stringstream> readObjectNoHeader(SHAString hash) const;
 
-    Option<Commit> readCommitObject();
+    Option<Commit> readCommitObject(SHAString hash);
 
 
     /**

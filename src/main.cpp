@@ -17,20 +17,30 @@ using namespace std::string_view_literals;
 #include "GitUpdateIndex.hpp"
 #include "GitCommitTree.hpp"
 #include "GitCatFile.hpp"
+#include "GitUpdateRef.hpp"
+#include "GitLog.hpp"
 
 int main() {
 
-    // Index &index = Index::getInstance();
-     hashObjectInterface("Hello world", InArgType::kRawString, ObjectType::kBlob, true);
-    // updateIndexCacheInfo(index,FileMode::kRegular,"70c379b63ffa0795fdbfbc128e5a2818397b7ef8","1.txt",true);
-    // SHAString sha= index.writeTree(false);
-    // std::cout << sha << '\n';
+    Index &index = Index::getInstance();
+    hashObjectInterface("Hello world", InArgType::kRawString, ObjectType::kBlob, true);
+    updateIndexCacheInfo(index, FileMode::kRegular, "70c379b63ffa0795fdbfbc128e5a2818397b7ef8", "1.txt", true);
+    SHAString sha = index.writeTree(false);
+    std::cout << sha << '\n';
 
-    auto ss=GitObjectsProxy::getInstance().readObject("70c379b63ffa0795fdbfbc128e5a2818397b7ef8").value();
-    std::cout << ss.str() << '\n' << int(ss.str()[7]) << "| ";
-    std::cout << ss.str().size() << '\n';
+    SHAString commit = commitTree("first commit",sha);
+    std::cout << commit << '\n';
 
-    auto ss2=GitObjectsProxy::getInstance().readObjectNoHeader("70c379b63ffa0795fdbfbc128e5a2818397b7ef8").value();
-    std::cout << ss2.str() << '\n';
+    updateRef(GitObjectsProxy::getHeadPath(), commit);
+//    std::cout << catFile(commit) << '\n';
+
+    printLog();
+
+//    auto ss = GitObjectsProxy::getInstance().readObject("70c379b63ffa0795fdbfbc128e5a2818397b7ef8").value();
+//    std::cout << ss.str() << '\n' << int(ss.str()[7]) << "| ";
+//    std::cout << ss.str().size() << '\n';
+//
+//    auto ss2 = GitObjectsProxy::getInstance().readObjectNoHeader("70c379b63ffa0795fdbfbc128e5a2818397b7ef8").value();
+//    std::cout << ss2.str() << '\n';
 
 }

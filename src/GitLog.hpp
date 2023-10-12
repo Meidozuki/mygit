@@ -12,10 +12,15 @@ inline void printLog() {
     if (!s.empty() && GitObjectsProxy::getInstance().find(s)) {
         SHAString hash = SHA1Proxy::invokeCreate(s.c_str());
 
-        Commit current;
-        std::cout << "commit " << current.sha1_\
-            << "\nAuthor: " << current.author_.name
-                  << "\nDate:   " << current.author_.timestamp
-                  << "\n\n\t" << current.message_ << std::endl;
+        auto current = GitObjectsProxy::getInstance().readCommitObject(hash);
+        while (current.nonEmpty()) {
+            auto &commit = current.value();
+            std::cout << "commit " << commit.sha1_\
+            << "\nAuthor: " << commit.author_.name
+                      << "\nDate:   " << commit.author_.timestamp
+                      << "\n\n\t" << commit.message_ << std::endl;
+
+            current = GitObjectsProxy::getInstance().readCommitObject(commit.parent_);
+        }
     }
 }

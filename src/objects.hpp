@@ -86,7 +86,8 @@ struct Author{
 
     Author(): name(),email(),timestamp(0),time_zone() {}
 
-    std::string toString() const ;
+    friend std::ostream& operator<<(std::ostream& os, const Author &author);
+    friend std::istream& operator>>(std::istream& is, Author &author);
 };
 
 class Commit: public GitObject {
@@ -100,4 +101,8 @@ class Commit: public GitObject {
     Commit(SHAString tree, SHAString parent):Commit(tree) {parent_ = parent;}
 
     std::string freeze() const override;
+
+    inline bool hasParent() {
+        return !parent_.empty() && parent_ != "nan";
+    }
 };

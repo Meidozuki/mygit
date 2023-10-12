@@ -32,12 +32,5 @@ struct B:A{
 
 
 int main () {
-    int n=1;
-    A a;
-    B b;
-    a.f(n);
-    a.f("abc");
-    a.f1();
-    b.f(n);
-    b.f2("aaa");
+    std::cout << std::is_trivially_copyable_v<std::optional<int>>;
 }
