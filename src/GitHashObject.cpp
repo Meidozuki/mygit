@@ -80,14 +80,15 @@ SHAString hashObjectInterface(StringView msg, InArgType arg_type, ObjectType typ
     if (if_write) {
         // Get path to save
         auto &objects_proxy = GitObjectsProxy::getInstance();
-        objects_proxy.insert(hash);
-        std::filesystem::path file_path = objects_proxy.getFilePath(hash).value(); // no failure
+        std::filesystem::path file_path = objects_proxy.getFilePathNoCheck(hash);
         
         // Open file to save
         std::filesystem::create_directories(file_path.parent_path());
         std::ofstream fs(file_path);
         if (fs.is_open()) {
             fs << full;
+            // Object file already exists so use the no-check version
+            objects_proxy.insertNoCheck(hash);
         }
         else {
             throw std::runtime_error("Open file "s + std::string(hash) + " failed when saving it."s); //throws
@@ -95,4 +96,17 @@ SHAString hashObjectInterface(StringView msg, InArgType arg_type, ObjectType typ
     }
 
     return hash;
+}
+
+#include <cstdio>
+bool testSSO(bool verbose) {
+    bool flag = true;
+    for (auto example : {"small", "", "1", "123", "12345", "blob 12", "commit 123"}) {
+        std::string s(example);
+        if (verbose)
+            printf("size = %ld, capacity = %ld, string=%s\n", s.size(), s.capacity(), example);
+        if (s.size() == s.capacity())
+            flag = false;
+    }
+    return flag;
 }

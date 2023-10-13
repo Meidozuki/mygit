@@ -75,6 +75,7 @@ class Tree: public GitObject {
     void addItem(TreeItem item);
 
     void cacheTreeInvalidate() {
+        // TODO: impl index cache tree extension
         num_entries_ = -1;
     }
 };

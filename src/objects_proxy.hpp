@@ -2,6 +2,7 @@
 
 #include "precompile.h"
 
+#include <string>
 #include <set>
 #include <filesystem>
 
@@ -11,11 +12,11 @@
 #include "FP_util.hpp"
 #include "GitHashObject.hpp"
 
+// GitObjectsProxy为本地文件和database的一一对应，本地文件不存在则无法加入
 class GitObjectsProxy {
  public:
     using HashType = SHAString;
-    using HashArg = const HashType&;
- private:
+ protected:
     static inline const Path GIT_DIR = ".mgit/"; // warning针对Path的构造函数没有noexcept，可无视
     std::set<HashType> database_;
     using IteratorType = typename decltype(database_)::iterator;
@@ -41,22 +42,61 @@ class GitObjectsProxy {
         const Path objects_dir(getObjectsDir());
         if (filesys::exists(objects_dir)) {
             for (auto &entry: filesys::directory_iterator(objects_dir)){
-                insert(entry.path().filename().string());
+                insertNoCheck(entry.path().filename().string());
             }
         }
     }
 
+    void resetMemory() {
+        database_.clear();
+    }
+
     // CRUD
+ protected:
     /**
-     * @param hash
+     * @brief Insert SHA1 into database
+     * @param hash SHA1 value pointing to an existing file
      * @return The iterator to the hash
      */
-    IteratorType insert(HashArg hash) {
+    IteratorType insertNoCheck(SHAString hash) {
         auto insert_result = database_.insert(hash);
         return insert_result.first;
     }
 
-    bool erase(HashArg hash) {
+    Path getFilePathNoCheck(SHAString hash) const {
+        return getObjectsDir() / hash;
+    }
+
+    bool eraseOnlyMemory(SHAString hash) {
+        auto it = database_.find(hash);
+        if (it != database_.end()) {
+            database_.erase(it);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    friend SHAString hashObjectInterface(StringView msg, InArgType arg_type, ObjectType type, bool if_write);
+
+ public:
+    /**
+     * @brief Insert SHA1 into database. Checks if the file exists
+     * @param hash SHA1 value pointing to an existing file
+     * @return The cref to the hash. If file not exists, throw
+     */
+    const SHAString& insert(SHAString hash) {
+        if (filesys::exists(getFilePathNoCheck(hash))) {
+            return *insertNoCheck(hash);
+        }
+        else{
+            auto msg = std::string("Trying to insert a non-existing object sha1 ") + hash.data() + '\n';
+            throw std::logic_error(msg);
+        }
+    }
+
+    bool erase(SHAString hash) {
         auto path = getFilePath(hash);
         auto exists = path.map<bool>([](const Path &path){return filesys::exists(path);});
         if (exists.has_value() && exists.get()) {
@@ -74,12 +114,12 @@ class GitObjectsProxy {
     }
 
     [[gnu::always_inline]]
-    bool find(HashArg hash) const {
+    bool find(SHAString hash) const {
         return database_.find(hash) != database_.end();
     }
 
-
-    Option<std::string> getFilePath(HashArg hash) const {
+    // Other functions
+    Option<std::string> getFilePath(SHAString hash) const {
         if (find(hash)) {
             Option<std::string> path{(GIT_DIR / "objects/").string()};
             path.value().append(hash);
@@ -120,7 +160,7 @@ class GitObjectsProxy {
     }
 
     GitObjectsProxy& operator=(const GitObjectsProxy &ano) = delete;
- private:
+ protected:
     GitObjectsProxy() = default;
     ~GitObjectsProxy() = default;
 };

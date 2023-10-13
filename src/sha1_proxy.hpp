@@ -1,6 +1,3 @@
-//
-// Created by user on 2023/9/16.
-//
 #pragma once
 
 #include "precompile.h"
@@ -35,56 +32,6 @@ class SHA1Proxy {
  private:
     std::set<StringProxy> existing_;
  public:
-    bool find(const StringProxy& str) const {
-        return existing_.find(str) != existing_.end();
-    }
-
-    SHAString create(const char* hash) {
-        StringProxy t(hash);
-        if (auto it = retrieve(t);
-            it.has_value()){
-            return it.value()->get();
-        }
-        else {
-            existing_.insert(t);
-            return retrieve(hash).value()->get();
-        }
-    }
-
-    void remove(const char* hash) {
-        StringProxy t(hash);
-        if (auto it = retrieve(t);
-            it.has_value()) {
-            existing_.erase(it.value());
-        }
-    }
-
-    std::optional<decltype(existing_)::iterator>
-    retrieve(const StringProxy& str) {
-        auto it = existing_.find(str);
-        if (it != existing_.end()) {
-            return it;
-        }
-        else {
-            return {};
-        }
-    }
-
-//    SHAString get(const char* hash) {
-//        auto it = existing_.find(hash);
-//        return it->get();
-//    }
-    
-    SHAString get_safe(const char* hash) {
-        auto re = retrieve(hash);
-        if (re.has_value()) {
-            return re.value()->get();
-        }
-        else {
-            return "";
-        }
-    }
-
     static constexpr inline int hex2dec(char c) {
         switch (c) {
             case '0': return 0;
@@ -107,6 +54,33 @@ class SHA1Proxy {
         }
     }
 
+    bool find(const StringProxy& str) const {
+        return existing_.find(str) != existing_.end();
+    }
+
+    SHAString create(const char* hash) {
+        auto insert_result = existing_.insert(StringProxy(hash));
+        return insert_result.first->get();
+    }
+
+    void remove(const char* hash) {
+        auto it = existing_.find(StringProxy(hash));
+        if (it != existing_.end()) {
+            existing_.erase(it);
+        }
+    }
+    
+    SHAString findAndGet(const char* hash) {
+        auto it = existing_.find(StringProxy(hash));
+        if (it != existing_.end()) {
+            return it->get();
+        }
+        else {
+            return {};
+        }
+    }
+
+
     // Convert from human-readable string to hex string
     static auto compressSHA(const char* hash) {
         if (strlen(hash) != 40) {
@@ -123,8 +97,8 @@ class SHA1Proxy {
 
     // Convenient wrappers
     static auto invokeCreate(const char* hash) { return getInstance().create(hash);}
-    static auto invokeRemove(const char* hash) {return getInstance().remove(hash);}
-    static auto invokeFind(const StringProxy& str) {return getInstance().find(str);}
+//    static auto invokeRemove(const char* hash) {return getInstance().remove(hash);}
+    static auto invokeFindAndGet(const char* hash) {return getInstance().findAndGet(hash);}
 
     // Singleton declare
     static SHA1Proxy& getInstance() {

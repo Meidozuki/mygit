@@ -105,13 +105,13 @@ Option<Commit> GitObjectsProxy::readCommitObject(SHAString hash) {
             Commit re;
             std::string s1,s2;
             ss >> s1 >> s2;
-            re.tree_ = SHA1Proxy::getInstance().get_safe(s2.c_str());
+            re.tree_ = SHA1Proxy::invokeFindAndGet(s2.c_str());
             ss >> s1 >> s2;
-            re.parent_ = SHA1Proxy::getInstance().get_safe(s2.c_str());
+            re.parent_ = SHA1Proxy::invokeFindAndGet(s2.c_str());
             ss >> s1 >> re.author_ >> s2 >> re.committer_;
             ss.ignore();ss.ignore();
 
-            std::getline(ss,re.message_, '\0');
+            std::getline(ss, re.message_, '\0');
             return re;
         });
     }

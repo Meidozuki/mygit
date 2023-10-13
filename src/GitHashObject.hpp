@@ -20,16 +20,5 @@ SHAString hashObjectInterface(StringView msg,
                                ObjectType type = ObjectType::kBlob,
                                bool if_write = false);
 
-
-#include <cstdio>
-static bool testSSO(bool verbose=true) {
-    bool flag=true;
-    for (auto example: {"small", "", "1", "123", "12345", "blob 12", "commit 123"}) {
-        std::string s(example);
-        if (verbose)
-            printf("size = %ld, capacity = %ld, string=%s\n", s.size(), s.capacity(), example);
-        if (s.size() == s.capacity())
-            flag = false;
-    }
-    return flag;
-}
+// Test SSO which will be used to create header
+bool testSSO(bool verbose=true);

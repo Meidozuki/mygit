@@ -13,7 +13,7 @@ include(cmake/detect_host.cmake)
 
 add_executable(
         hello_test
-        test_main.cpp
+        hello_test.cpp
 )
 target_link_libraries(
         hello_test
@@ -37,7 +37,7 @@ function(combine_test arg_test_name arg_src_files)
     gtest_discover_tests(${arg_test_name})
 endfunction()
 
-combine_test(check_types checkTypeProperty.cpp)
+combine_test(check_types check_type_property.cpp)
 combine_test(hash_object_test hash_object_test.cpp)
 combine_test(index_alone_test index_test.cpp)
 combine_test(update_index_test update_index_test.cpp)

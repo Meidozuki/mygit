@@ -6,8 +6,7 @@
 
 #include "objects.hpp"
 #include "GitHashObject.hpp"
-
-using FuncWithNoArg = std::function<void()>;
+#include "objects_proxy.hpp"
 
 struct Throwing{
     std::string msg;
@@ -121,7 +120,7 @@ void updateIndexCacheInfo(Index &index, FileMode mode, const char *hash, Path fi
     context.add = add;
     context.remove = remove;
 
-    if (!SHA1Proxy::invokeFind(hash)) {
+    if (!GitObjectsProxy::getInstance().find(hash)) {
         std::string msg = "invalid SHA1 value ";
         throw std::invalid_argument(msg + hash);
     }
