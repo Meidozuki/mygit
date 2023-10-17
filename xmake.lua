@@ -26,7 +26,8 @@ files = {"src/GitHashObject.cpp",
     "src/GitUpdateIndex.cpp", 
     "src/GitWriteTree.cpp",
     "src/GitCommitTree.cpp",
-    "src/GitCatFile.cpp"}
+    "src/GitCatFile.cpp",
+    "src/objects_proxy.cpp"}
 
 target("src_lib")
     set_kind("static")
