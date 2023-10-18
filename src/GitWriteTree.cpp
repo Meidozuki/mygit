@@ -57,7 +57,7 @@ void traversalTreeStructure(TreeNode &root, FIFOQueue &FIFO, bool verbose=false)
         
         // extension: 写入到index中
         entry.sha1 = hash.data();
-        entry.filename = root.node_description.filename_;
+        entry.filename = root.node_description.filename_.string();
 
         // return the result to the caller
         root.node_description.hash_ = hash.data();

@@ -15,7 +15,7 @@ inline void printLog() {
         auto current = GitObjectsProxy::getInstance().readCommitObject(hash);
         while (current.nonEmpty()) {
             auto &commit = current.value();
-            std::cout << "commit " << commit.sha1_\
+            std::cout << "commit " << hash\
             << "\nAuthor: " << commit.author_.name
                       << "\nDate:   " << commit.author_.timestamp
                       << "\n\n\t" << commit.message_ << std::endl;
