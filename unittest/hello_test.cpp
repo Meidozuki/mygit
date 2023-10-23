@@ -6,6 +6,7 @@ using namespace std::string_view_literals;
 
 #include "GitUpdateIndex.hpp"
 
+#include "config.h"
 #include "index_test_common.hpp"
 
 class WriteTreeTest: public IndexTestBase{
@@ -41,9 +42,9 @@ TEST_F(WriteTreeTest, TestHelloWorldByFileReadOnly) {
     chmod644(filename);
 
     updateIndex(index(), filename);
-//#ifdef Windows_file_permission
+#ifdef Windows_file_permission
     EXPECT_TRUE(index().chmod(filename, false));
-//#endif
+#endif
 
     EXPECT_EQ(index().getDict().size(), 1);
     for (auto &[_,ptr]: index().getDict()) {
@@ -101,9 +102,4 @@ TEST_F(WriteTreeTest, TestTwoLevelDirectory) {
 
     std::ofstream(index_path) << index();
     removeFile(filename);
-}
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

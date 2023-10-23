@@ -1,4 +1,5 @@
 include(FetchContent)
+cmake_policy(SET CMP0135 NEW)
 FetchContent_Declare(
         googletest
         URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
@@ -11,20 +12,7 @@ enable_testing()
 
 include(cmake/detect_host.cmake)
 
-add_executable(
-        hello_test
-        hello_test.cpp
-)
-target_link_libraries(
-        hello_test
-        GTest::gtest_main
-        src_lib)
-target_include_directories(
-        hello_test PUBLIC
-        ${CMAKE_SOURCE_DIR}/src)
-
 include(GoogleTest)
-gtest_discover_tests(hello_test)
 
 function(combine_test arg_test_name arg_src_files)
     add_executable(${arg_test_name} main_body.cpp ${arg_src_files})
@@ -37,6 +25,7 @@ function(combine_test arg_test_name arg_src_files)
     gtest_discover_tests(${arg_test_name})
 endfunction()
 
+combine_test(hello_test hello_test.cpp)
 combine_test(check_types check_type_property.cpp)
 combine_test(hash_object_test hash_object_test.cpp)
 combine_test(index_alone_test index_test.cpp)

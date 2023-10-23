@@ -130,6 +130,10 @@ class GitObjectsProxy {
         }
     }
 
+    bool checkFileExists(SHAString hash) const {
+        return filesys::exists(getFilePathNoCheck(hash));
+    }
+
     ObjectType getObjectType(SHAString hash) const;
 
     ObjectType getObjectTypeNoThrow(SHAString hash) const noexcept;
@@ -147,6 +151,9 @@ class GitObjectsProxy {
 
     Option<Commit> readCommitObject(SHAString hash);
 
+    static auto getNameOfType(ObjectType type) {
+        return GitObject::typeName(type);
+    }
 
     /**
      * convenient wrapper to hash an already-built object (i.e. tree object).

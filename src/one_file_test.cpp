@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include "common.hpp"
+#include "objects.hpp"
 using std::cout;
 
 struct A{
@@ -32,5 +33,5 @@ struct B:A{
 
 
 int main () {
-    std::cout << std::is_trivially_copyable_v<std::optional<int>>;
+    std::cout << sizeof(std::string_view) << '\n';
 }

@@ -36,10 +36,6 @@ int main() {
 
     printLog();
 
-//    auto ss = GitObjectsProxy::getInstance().readObject("70c379b63ffa0795fdbfbc128e5a2818397b7ef8").value();
-//    std::cout << ss.str() << '\n' << int(ss.str()[7]) << "| ";
-//    std::cout << ss.str().size() << '\n';
-//
 //    auto ss2 = GitObjectsProxy::getInstance().readObjectNoHeader("70c379b63ffa0795fdbfbc128e5a2818397b7ef8").value();
 //    std::cout << ss2.str() << '\n';
 

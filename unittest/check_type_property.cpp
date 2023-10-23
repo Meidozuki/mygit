@@ -12,7 +12,6 @@ TEST(CheckTypeProperty, CheckTrivial_ShaString) {
     EXPECT_TRUE(is_trivially_copyable_v<SHAString>);
 }
 
-
 TEST(CheckTypeProperty, CheckTrivial_ConditionCheck) {
     EXPECT_TRUE(is_trivially_copyable_v<ConditionCheck>);
     EXPECT_TRUE(is_trivial_v<ConditionCheck>);

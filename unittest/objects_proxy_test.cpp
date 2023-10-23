@@ -48,6 +48,42 @@ class ObjectsProxyTest: public ::testing::Test {
 
 };
 
+TEST(ObjectsTest, TestObjectTypeNameConvert) {
+    EXPECT_STREQ(GitObject::typeName(ObjectType::kBlob), "blob");
+    EXPECT_STREQ(GitObject::typeName(ObjectType::kTree), "tree");
+    EXPECT_STREQ(GitObject::typeName(ObjectType::kCommit), "commit");
+    EXPECT_STREQ(GitObject::typeName(ObjectType::kTag), "tag");
+}
+
+TEST(ObjectsTest, TestBlob) {
+    Blob obj;
+    obj.content_ = "vbao";
+    EXPECT_EQ(obj.type_, ObjectType::kBlob);
+    EXPECT_EQ(obj.freeze(), "vbao");
+}
+
+TEST(ObjectsTest, TestTree) {
+    Tree obj;
+    const char hello_sha[] = "70c379b63ffa0795fdbfbc128e5a2818397b7ef8";
+    obj.addItem(TreeItem("1.txt", hello_sha, FileMode::kRegular, ObjectType::kBlob));
+
+    EXPECT_EQ(obj.type_, ObjectType::kTree);
+
+    std::stringstream ss;
+    ss << "100644 1.txt" << '\0' << SHA1Proxy::compressSHA(hello_sha).data();
+    EXPECT_EQ(obj.freeze(), ss.str());
+}
+
+TEST(ObjectsTest, TestCommit) {
+    Commit obj;
+    EXPECT_EQ(obj.type_, ObjectType::kCommit);
+    EXPECT_EQ(obj.freeze(),"tree \n"
+                           "parent nan\n"
+                           "author   0 +0000\n"
+                           "committer   0 +0000\n"
+                           "\n");
+}
+
 TEST_F(ObjectsProxyTest, TestClear) {
     auto &db = proxy().database_;
     db.clear();
